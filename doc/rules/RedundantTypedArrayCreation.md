@@ -30,9 +30,35 @@ initializer. Note that
 ### Remarks
 
 There are some cases where type inference does not work so that the
-implicitly-typed arrays are not available.
-For example, when all the elements are Method References, the implicitly-typed
-array creation causes an error CS0826 as follows:
+implicitly-typed arrays are not available. For example, it doesn't work when all
+the elements are one of the following:
+
+- Implicit `new` (`new(…)`)
+- Collection expression
+- `null` literal
+- `default`
+
+There are also some cases where the implicitly-typed arrays change the meaning.
+For example, the element of `array` is of type `int?` (`Nullable<int>`) in the following code:
+
+```cs
+var array = new int?[] { 42, };
+```
+
+Let's leave the array initializer as it is and change the expression to an
+implicitly-typed array. Then, the element of `array` is of type `int`, as
+follows:
+
+```cs
+var array = new[] { 42, };
+```
+
+
+
+### C# 9 and earlier versions
+
+Prior to C# 10, the implicitly-typed array creation causes an error CS0826 when
+all the elements are Method References as follows:
 
 ```csharp
 public static void RaiseCS0826()
@@ -48,7 +74,7 @@ public static void DoSomething()
 }
 ```
 
-> [See errors][sharplab:examples]
+> [See errors in C# 9][sharplab:examples]
 
 ## Code fix
 
