@@ -51,7 +51,7 @@ for the following code:
 
 ```csharp
 // a standalone discard: ignored if no variable named '_' is in scope.
- _ = "hello".Length;
+_ = "hello".Length;
 
 // tuple
 (int, int) NewPoint(int x, int y) => (x, y);
