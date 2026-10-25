@@ -20,7 +20,7 @@ Warning
 
 ## Description
 
-Consider a good name for each local variable.
+Consider a good name for each local variable and parameter.
 The name of the identifiers must not be too easy as a typical sample code.
 This rule reports the following cases:
 
@@ -31,6 +31,17 @@ This rule reports the following cases:
 - Hungarian notation must not be used. For example, do not use `int iResult`.
 - The identifiers specified with the configuration file `StyleChecker.xml`
   must not be used.
+
+### Target parameters
+
+This analyzer inspects parameters declared in various contexts, including:
+
+- Method parameters
+- Constructor parameters
+- Local function parameters
+- Lambda expression and anonymous method parameters
+
+### Disallowed identifiers
 
 You can specify identifiers which are not allowed to use,
 with the configuration file `StyleChecker.xml`.

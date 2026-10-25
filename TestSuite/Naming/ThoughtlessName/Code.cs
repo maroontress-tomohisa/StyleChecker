@@ -9,6 +9,14 @@ namespace StyleChecker.Test.Naming.ThoughtlessName
 
     public sealed class Code
     {
+        public Code(
+            StringBuilder sb,
+            //@           ^a,sb,StringBuilder
+            int @iVal)
+            //@ ^h,@iVal,int
+        {
+        }
+
         public void Arconym()
         {
             var sb = new StringBuilder();
@@ -67,6 +75,48 @@ namespace StyleChecker.Test.Naming.ThoughtlessName
             int @iVal)
             //@ ^h,@iVal,int
         {
+        }
+
+        public void LocalFunctionParameter()
+        {
+            void Local(
+                StringBuilder sb,
+                //@           ^a,sb,StringBuilder
+                int @iVal)
+                //@ ^h,@iVal,int
+            {
+            }
+            Local(new StringBuilder(), 0);
+        }
+
+        public void LambdaParameter()
+        {
+            Action<StringBuilder, int> action = (sb, iVal) =>
+            //@                                  ^a,sb,StringBuilder
+            //@                                      ^h,iVal,int
+            {
+            };
+            action(new StringBuilder(), 0);
+
+            Action<StringBuilder> anon = delegate(StringBuilder sb)
+            //@                                                 ^a,sb,StringBuilder
+            {
+            };
+            anon(new StringBuilder());
+        }
+
+        public void OutParameter()
+        {
+            void OutFunc(out StringBuilder sb, out int iVal)
+            //@                            ^a,sb,StringBuilder
+            //@                                        ^h,iVal,int
+            {
+                sb = new StringBuilder();
+                iVal = 0;
+            }
+            OutFunc(out var sb, out var iValRes);
+            //@             ^a,sb,StringBuilder
+            //@                         ^h,iValRes,int
         }
 
         public void Designation()

@@ -167,33 +167,14 @@ public sealed class Analyzer : AbstractAnalyzer
         var model = context.SemanticModel;
         var root = model.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
 
-        static T? ToNodeOf<T>(ISymbol s)
-            where T : SyntaxNode
-        {
-            return s.DeclaringSyntaxReferences
-                .FirstOrDefault()
-                ?.GetSyntax() as T;
-        }
-
-        static IEnumerable<(T Symbol, U Node)> ToPairs<T, U>(T p)
-            where T : ISymbol
-            where U : SyntaxNode
-        {
-            return ToNodeOf<U>(p) is {} node
-                ? [(p, node)]
-                : [];
-        }
-
         var locals = LocalVariables.Symbols(model)
             .Select(s => (s.Token, s.Symbol as ISymbol, s.Symbol.Type));
-        var parameters = root.DescendantNodes()
-            .OfType<MethodDeclarationSyntax>()
-            .Select(s => model.GetDeclaredSymbol(s))
-            .FilterNonNullReference()
-            .SelectMany(s => s.Parameters)
-            .SelectMany(ToPairs<IParameterSymbol, ParameterSyntax>)
-            .Select(c
-                => (c.Node.Identifier, c.Symbol as ISymbol, c.Symbol.Type));
+        var parameters = LocalVariables.ParameterTokens(root)
+            .Select(t => (Token: t, Node: t.Parent as ParameterSyntax))
+            .Where(x => x.Node is not null)
+            .Select(x => (x.Token, Symbol: model.GetDeclaredSymbol(x.Node!, cancellationToken)))
+            .Where(x => x.Symbol is not null && x.Symbol.Type is not null)
+            .Select(x => (x.Token, Symbol: (ISymbol)x.Symbol!, Type: x.Symbol!.Type));
         var all = locals.Concat(parameters)
             .ToList();
         foreach (var (token, symbol, typeSymbol) in all)
