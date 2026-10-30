@@ -25,7 +25,7 @@ Warning
 [UnmanagedMemoryStream][system.io.unmanagedmemorystream], and
 [UnmanagedMemoryAccessor][system.io.unmanagedmemoryaccessor]
 implement [IDisposable][system.idisposable] but dispose of nothing.
-See the note of them \[[1](#ref1)\], which is quoted as follows:
+See the note of these types in \[[1](#ref1)\], which states:
 
 > **Note**
 >
@@ -39,7 +39,7 @@ make sense. They must be created without `using` statements.
 
 ## Code fix
 
-The code fix provides an option eliminating `using` statements.
+The code fix provides an option to eliminate `using` statements.
 
 ## Example
 
@@ -54,7 +54,7 @@ public class Main
     {
         using (var s = new MemoryStream())
         {
-            ...
+            ⋮
         }
     }
 }
@@ -72,7 +72,7 @@ public class Main
         {
             var s = new MemoryStream();
             {
-                ...
+                ⋮
             }
         }
     }

@@ -43,15 +43,14 @@ Conditional expressions where the second or third operand is a
 
 ### Remarks
 
-The diagnostics IDE0057 providing _Simplify conditional expressions
-refactoring_, which is available with [Visual Studio 2019 version 16.6 preview
-2][microsoft:vs2019-v16.6-preview-2], includes the same feature as this
-analyzer.
+The IDE0075 diagnostic provides the same feature as this analyzer. It is
+available as the _Simplify conditional expression_ refactoring in [Visual
+Studio 2019 version 16.6 preview 2][microsoft:vs2019-v16.6-preview-2].
 
 ## Code fix
 
-The code fix provides an option replacing the conditional operator with the `&&`
-or `||` operator. However, if the diagnostics IDE0057 provides an option
+The code fix provides an option to replace the conditional operator with the
+`&&` or `||` operator. However, if the IDE0075 diagnostic provides an option
 "Simplify conditional expression" with Visual Studio, you should use it.
 
 ## Example

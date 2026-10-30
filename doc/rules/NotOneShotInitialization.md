@@ -19,10 +19,8 @@ Warning
 
 ## Description
 
-Do **NOT**:
-
-- Declare a local variable and initialize it with a provisional value
-- And then, depending on some condition, assign another value to that variable
+Do **NOT** declare a local variable with a provisional value and then assign
+another value to that variable depending on some condition.
 
 For example, see the following code:
 
@@ -36,27 +34,27 @@ public void Foo(int score)
     {
         s = MaxScore;
     }
-    ...
+    ⋮
 }
 ```
 
-Walter E.  Brown calls this **the &ldquo;let me change my mind&rdquo; idiom**
-in \[[1](#ref1)\].
+Walter E. Brown calls this **the &ldquo;let me change my mind&rdquo; idiom** in
+\[[1](#ref1)\].
 
 You should rewrite it with _one-shot initialization_ as follows:
 
 ```cs
-...
+⋮
 var s = (score > MaxScore) ? MaxScore : score;
-...
+⋮
 ```
 
 or
 
 ```cs
-...
+⋮
 var s = Math.Min(score, MaxScore);
-...
+⋮
 ```
 
 Let's see the next example:
@@ -76,25 +74,25 @@ public void Bar(string colorName)
         case "red":
             c = 2;
             break;
-        ...
+        ⋮
     }
-    ...
+    ⋮
 }
 ```
 
 We can rewrite it with the `switch` expression as follows:
 
 ```cs
-...
+⋮
 var c = colorName switch
 {
     "black" => 0,
     "blue" => 1,
     "red" => 2,
-    ...
+    ⋮
     _ => -1,
 };
-...
+⋮
 ```
 
 or with `Dictionary`:
@@ -106,7 +104,7 @@ private static readonly Dictionary<string, int> colorMap
     ["black"] = 0,
     ["blue"] = 1,
     ["red"] = 2,
-    ...
+    ⋮
 };
 
 public void Bar(string colorName)
@@ -116,21 +114,21 @@ public void Bar(string colorName)
     // code instead:
     //
     // var c = colorMap.TryGetValue(colorName, out var found) ? found : -1;
-    ...
+    ⋮
 }
 ```
 
-In addition to the above example, you can also move the initial value to
-another method that returns a value such as `var s = Method();`.  Or, if the
-separation with another method causes a lot of parameters, you can define the
-local function instead of the method;
+In addition to the above examples, you can extract the code that computes the
+initial value into another method that returns the value, such as
+`var s = Method();`. If the extracted method would require many parameters,
+define a local function instead.
 
 ### Initializing multiple local variables
 
 Consider the following example:
 
 ```csharp
-bool b = ...;
+bool b = …;
 
 var x = 0;
 var y = 1;
@@ -171,7 +169,7 @@ public void Baz()
     {
         logger.Info($"input: {n}");
     }
-    ...
+    ⋮
 }
 ```
 
@@ -194,12 +192,12 @@ public void Baz()
         logger.Info($"input: {raw}");
     }
     var n = isValid ? raw : DefaultValue;
-    ...
+    ⋮
 }
 ```
 
-The branch depending on `isValid` should be one time as well as the original
-code.  You can do so with local functions as follows:
+The branch on `isValid` should appear only once, as in the original code. You
+can achieve this with local functions as follows:
 
 ```csharp
 public void Baz()
@@ -221,14 +219,14 @@ public void Baz()
         ? (Func<int, int>)ValidUserInput
         : InvalidUserInput;
     var n = supplier(raw);
-    ...
+    ⋮
 }
 ```
 
 > [Run][example-2]
 
-Or more simply, you can also use a tuple containing the action of type `Action`
-that represents side effects, as follows:
+Or more simply, you can also use a tuple containing an `Action` delegate that
+represents the side effects, as follows:
 
 ```csharp
 public void Baz()
@@ -238,14 +236,14 @@ public void Baz()
         ? (raw, new Action(() => logger.Info($"input: {raw}")))
         : (DefaultValue, () => logger.Warn($"invalid input: {raw}"));
     action();
-    ...
+    ⋮
 }
 ```
 
 > [Run][example-3]
 
-Note that this analyzer does not emit diagnostics against the code examples
-described in this section.
+Note that this rule does not report diagnostics for the code examples described
+in this section.
 
 ## Code fix
 
@@ -257,26 +255,26 @@ The code fix is not provided.
 
 ```csharp
 var b = 1;
-if (...) {
+if (…) {
     b = 3;
 }
 ```
 
 ```csharp
 var n = 0;
-if (...) {
+if (…) {
     ++n;
 }
 ```
 
 ```csharp
 var v = 0;
-switch (...)
+switch (…)
 {
-    case ...:
+    case …:
         v = 1;
         break;
-    case ...:
+    case …:
         v = 2;
         break;
 }
@@ -284,7 +282,7 @@ switch (...)
 
 ## References
 
-<a name="ref1"></a>
+<a id="ref1"></a>
 \[1\] [Walter E. Brown. _Crazy Code, Crazy Coders_, Meeting C++ 2019][crazy-code-crazy-coders]
 
 [fig-NotOneShotInitialization]:

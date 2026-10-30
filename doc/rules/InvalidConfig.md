@@ -14,7 +14,7 @@ Error
 ## Description
 
 This is not a rule. The InvalidConfig analyzer validates `StyleChecker.xml`
-and reports the errors. Some typical errors are described below.
+and reports any errors in it. Some typical errors are described below.
 
 ### &sect; Not a well-formed XML document
 
@@ -23,16 +23,16 @@ and reports the errors. Some typical errors are described below.
 
 The _element_ is not closed.
 
-### &sect; Not valid for the Schema
+### &sect; Not valid against the schema
 
-> unexpected node type: Element of the element '_unexpected_'
-> (it is expected that the element '_expected_' starts)
+> Unexpected node type: Element of the element '_unexpected_'.
+> (Expected the start of element '_expected_'.)
 
 The root element is not `config`, or the specified XML namespace is not
 `"https://maroontress.com/StyleChecker/config.v1"`.
 
-> unexpected node type: Element of the element '_unexpected_'
-> (it is expected that the element '_expected_' ends)
+> Unexpected node type: Element of the element '_unexpected_'.
+> (Expected the end of element '_expected_'.)
 
 The _unexpected_ element occurred.
 
@@ -64,7 +64,7 @@ zero or a negative integer value.
 
 > invalid boolean value of 'inclusive' attribute: '...'
 
-The `inclusive` attribute of the `with` element does not have a
+The `inclusive` attribute of the `ignore` element does not have a
 boolean value. (It is possible to specify any one of the following values:
 `true`, `false`, `1`, `0`.)
 

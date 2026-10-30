@@ -20,30 +20,33 @@ Warning
 ## Description
 
 This is something like the C# version of
-[_DesignForExtension check_][design-for-extension-checkstyle]
-of Checkstyle\[[1](#ref1)\].
-This rule reports diagnostic information of classes that have
-a non-empty overridable method or property as follows:
+[_DesignForExtension check_][design-for-extension-checkstyle] of Checkstyle
+\[[1](#ref1)\].
 
-- The `virtual` method which is `public` or `protected`
-and implementation of which is not empty
-- The `virtual` property which is `public` or `protected`
+Roughly speaking, this rule reports diagnostics for a class that has a
+non-empty overridable method or an overridable property. More precisely, it
+reports diagnostics for a class that is not `sealed` and has any of the
+following members:
 
-This rule prevents
-[_the fragile base class problem_][fragile-base-class] \[[2](#ref2)\].
-And it also prevents [_Call Super_][call-super] \[[2](#ref2)\],
-_neutralizing_ a call to the overridden method
-of the base class, that is, invoking `base`._Method_(...) in C#.
+- A `virtual` method or an `override` method that is not marked `sealed`,
+  unless it returns `void` and its implementation is empty
+- A `virtual` property or an `override` property that is not marked `sealed`
+
+This rule prevents [_the fragile base class problem_][fragile-base-class]
+\[[2](#ref2)\]. It also prevents [_Call Super_][call-super] \[[2](#ref2)\] by
+_neutralizing_ a call to the overridden method of the base class, that is,
+invoking `base`._Method_(...) in C#: the `virtual` method must be empty or
+`abstract`, so the base implementation has nothing worth calling.
 
 ## Code fix
 
-The code fix is not provided. Refactor the `virtual` method to be
-empty or `abstract` one, for example, using the
-[_Template Method Pattern_][template-method-pattern]
-\[[3](#ref3)\].
-And then, change the `override` method (this is, the method
-overriding the method of the base class) to be `sealed`, or change
-the class to be `sealed`.
+The code fix is not provided. Make the `virtual` method `abstract`, or empty if
+it returns `void`, for example, using the
+[_Template Method Pattern_][template-method-pattern] \[[3](#ref3)\].
+And then, change the `override` method (that is, the method overriding the
+base-class method) to be `sealed`, or change the class to be `sealed`. Note
+that an `override` method that returns `void` and has an empty implementation
+is not reported, so it need not be `sealed`.
 
 ## Example
 
@@ -89,7 +92,7 @@ public class DerivedClass : BaseClass
   > class change is safe simply by examining in isolation the methods of the
   > base class.
 
-- [_Call super_][call-super] \[[2](#ref2)\]
+- [_Call Super_][call-super] \[[2](#ref2)\]
 
   > **Call super** is a code smell or anti-pattern of some object-oriented
   > programming languages. Call super is a design pattern in which a

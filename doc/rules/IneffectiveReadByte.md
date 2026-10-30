@@ -11,8 +11,8 @@
 
 ## Summary
 
-Avoid invoking `System.IO.BinaryReader.ReadByte()` method in a loop.
-Instead, use `Read(byte[], int, int)` method.
+Avoid invoking the `System.IO.BinaryReader.ReadByte()` method in a loop.
+Instead, use the `Read(byte[], int, int)` method.
 
 ## Default severity
 
@@ -35,22 +35,25 @@ where:
   returning `byte[]`
 - `binaryReader` can be any `System.IO.BinaryReader` variable or
   auto-implemented property returning `System.IO.BinaryReader`
-- `i` can be any `int` variable, but it must be declared in `expr1`
-- `expr1` must be `int i = START` or `var i = START`
+- `i` can be any `int` variable, but it must be declared in `expr1` and must
+  not be modified in the body of the `for` loop
+- `expr1` must declare `i` and initialize it with `START`, for example,
+  `int i = START` or `var i = START`
 - `expr2` must be `i < END` or `i <= END`
 - `expr3` must be `++i` or `i++`
-- `START` and `END` are constant integers, and `START` is less than or equal
-  to `END`
+- `START` and `END` are `int` literals, and `START` is less than `END` if
+  `expr2` is `i < END`, or less than or equal to `END` if `expr2` is
+  `i <= END`
 
-because it is ineffective and can be replaced with more effective one invoking
-`Read(byte[], int, int)`.
+This analyzer reports this code because it is inefficient and can be replaced
+with a more efficient alternative that invokes `Read(byte[], int, int)`.
 
-For example, following code invoking `ReadByte()` method in the `for` loop
-is reported with the diagnostic:
+For example, this analyzer reports a diagnostic for the following code, which
+invokes the `ReadByte()` method in the `for` loop:
 
 ```csharp
-BinaryReader reader = ...;
-byte[] buffer = ...;
+BinaryReader reader = …;
+byte[] buffer = …;
 
 for (var i = 0; i < 1000; ++i)
 {
@@ -58,12 +61,12 @@ for (var i = 0; i < 1000; ++i)
 }
 ```
 
-The `for` loop and invoking `ReadByte()` method can be replaced with
-the `readFully`-like code as follows:
+The `for` loop and the invocation of the `ReadByte()` method can be replaced
+with the `readFully`-like code as follows:
 
 ```csharp
-BinaryReader reader = ...;
-byte[] buffer = ...;
+BinaryReader reader = …;
+byte[] buffer = …;
 
 var offset = 0;
 var length = 1000;
@@ -79,12 +82,13 @@ while (length > 0)
 }
 ```
 
-If the underlying stream `reader.BaseStream` has always available data
-except for end of stream, it is more simply rewritten as follows:
+One might think that if the underlying stream `reader.BaseStream` always has
+available data except at the end of the stream, it can be rewritten more simply
+as follows:
 
 ```csharp
-BinaryReader reader = ...;
-byte[] buffer = ...;
+BinaryReader reader = …;
+byte[] buffer = …;
 
 var size = reader.Read(buffer, 0, 1000);
 if (size < 1000)
@@ -93,11 +97,10 @@ if (size < 1000)
 }
 ```
 
-However, even `System.IO.MemoryStream` doesn't guarantee
-to read requested bytes when the end of the stream has not been reached.
-See the specifications of
-[MemoryStream.Read Method][system.io.memorystream.read]
-\[[1](#ref1)\], which are quoted as follows:
+However, even `System.IO.MemoryStream` doesn't guarantee to read requested
+bytes when the end of the stream has not been reached. See the specifications
+of [MemoryStream.Read Method][system.io.memorystream.read] \[[1](#ref1)\],
+which are quoted as follows:
 
 > The `Read` method will return zero only if the end of the stream is
 > reached. In all other cases, `Read` always reads at least one byte from
@@ -110,11 +113,10 @@ See the specifications of
 
 ## Code fix
 
-The code fix provides an option replacing the `for` loop with a code
-fragment, declaring an `Action` delegate and invoking it. You
-should refactor the auto-generated code with renaming identifiers and
-replacing the delegate with the local function or extension method
-if possible.
+The code fix provides an option to replace the `for` loop with a code fragment,
+declaring an `Action` delegate and invoking it. After applying the code fix,
+you should refactor the auto-generated code by renaming the identifiers and, if
+possible, replacing the delegate with a local function or an extension method.
 
 ## Example
 

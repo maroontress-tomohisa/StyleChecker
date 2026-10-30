@@ -11,7 +11,7 @@
 
 ## Summary
 
-Use Using Declarations to declare a local variable whenever possible.
+Use using declarations to declare a local variable whenever possible.
 
 ## Default severity
 
@@ -20,8 +20,8 @@ Warning
 ## Description
 
 When you declare a local variable and initialize it with an
-[`IDisposable`][system.idisposable] object, you should use the Using Declaration
-\[[1](#ref1)\] whenever possible as follows:
+[`IDisposable`][system.idisposable] object, you should use the using
+declaration \[[1](#ref1)\] whenever possible as follows:
 
 ```csharp
 // For implicitly-typed variables
@@ -34,19 +34,20 @@ using StreamReader i = new("file.txt");
 using StreamReader j = new("1.txt"), k = new("2.txt");
 ```
 
-The Using Declaration is preferred to the Using Statement or the `try`-`finally`
-idiom because it is easier to describe RAII in C#.
+The using declaration is preferred to the using statement or the
+`try`-`finally` idiom because it makes RAII easier to write in C#: the object
+is disposed of automatically when its scope ends.
 
 ### Remarks
 
-This analyzer only triggers diagnostics if the local variable is declared and
-initialized with the `new` operator. It ignores the declaration of the local
-variable that is initialized with an `IDisposable` instance any function or
-property returns, as follows:
+This rule reports a diagnostic only when the local variable is declared and
+initialized with the `new` operator. It ignores a local variable declaration if
+a method or property returns the `IDisposable` instance that initializes it.
+For example:
 
 ```csharp
 // OK
-var out = System.Console.Out;
+var output = System.Console.Out;
 
 static TextReader NewStreamReader() => new StreamReader("file.txt");
 
@@ -59,20 +60,23 @@ than the `new` operator is also not covered as follows:
 
 ```csharp
 // OK (but you should prevent resource leaks)
-var reader = (inputFile is null)
+TextReader reader = (inputFile is null)
     ? new StringReader(defaultText)
-    : new StreamReader(inputFile); 
+    : new StreamReader(inputFile);
 ```
 
-### Cases where no diagnosis is issued
+Note that this example requires C# 9 or later (target-typed conditional
+expression).
 
-This analyzer should not raise a diagnostic when a factory method creates and
+### Cases where no diagnostic is reported
+
+This rule does not report a diagnostic when a factory method creates and
 returns an `IDisposable` object as follows:
 
 ```csharp
 public Socket? NewTcpSocket(Uri uri, int port)
 {
-    // XXX (you cannot use Using Declaration)
+    // XXX (you cannot use a using declaration)
     var socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
     try
     {
@@ -87,7 +91,7 @@ public Socket? NewTcpSocket(Uri uri, int port)
 }
 ```
 
-Similarly, this analyzer should not raise a diagnostic if you instantiate an
+Similarly, this rule does not report a diagnostic if you instantiate an
 `IDisposable` object and assign it to a field or property or capture it as
 follows:
 
@@ -98,7 +102,7 @@ private StreamWriter? SharedWriter { get; set; }
 
 public void PrepareStream()
 {
-    // XXX (you cannot use Using Declaration)
+    // XXX (you cannot use a using declaration)
     var reader = new StreamReader("input.txt");
     streamReader = reader;
     var writer = new StreamWriter("output.txt");
@@ -108,7 +112,7 @@ public void PrepareStream()
 
 public static Action WriteHelloAction()
 {
-    // XXX (you cannot use Using Declaration)
+    // XXX (you cannot use a using declaration)
     var writer = new StreamWriter("file.txt");
     return () =>
     {
@@ -118,13 +122,13 @@ public static Action WriteHelloAction()
 }
 ```
 
-This analyzer should still not raise a diagnostic in the following complex case
+This rule does not report a diagnostic in the following complex case, either,
 where you instantiate an `IDisposable` object wrapped in a decorator pattern:
 
 ```csharp
 public BufferedStream NewClientStream(…)
 {
-    // XXX (you cannot use Using Declaration)
+    // XXX (you cannot use a using declaration)
     var clientSocket = new Socket(
         AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     clientSocket.Connect(…);
@@ -134,32 +138,36 @@ public BufferedStream NewClientStream(…)
 }
 ```
 
-It also does not issue a diagnostic when you reassign any value to the variable
-as follows:
+It also does not report a diagnostic when you reassign any value to the
+variable as follows:
 
 ```csharp
-// XXX (Using Declaration causes an error CS1656 at the line /*💀*/.)
+// XXX (a using declaration causes an error CS1656 at the line /*💀*/.)
 var i = new StreamReader("file.txt");
 Console.WriteLine(i.ReadLine());
 /*💀*/ i = new StreamReader("another.txt");
 Console.WriteLine(i.ReadLine());
 ```
 
-In summary, this analyzer will not issue diagnostics if the variable
-representing the created instance is:
+In summary, this rule does not report a diagnostic if the variable representing
+the created instance is:
 
-- used as a parameter of a method or constructor
+- used as an argument to a method or constructor
 - on the right side of the assignment expression
 - captured
 - returned
 - reassigned
+- used as an element of a tuple
+- used as an element of a collection expression
 
 Therefore, you should be aware that resource leaks can occur even though this
-analyzer does not issue any diagnostics.
+rule does not report any diagnostics.
 
-### Classes whose dispose() method does nothing
+### Classes that do not need to be disposed
 
-The local variables whose type is one of the following are not covered:
+These types implement `IDisposable`, but their `Dispose()` method releases no
+unmanaged resources. The local variables whose type is one of the following are
+not covered:
 
 - [`System.IO.StringReader`][system.io.stringreader]
 - [`System.IO.StringWriter`][system.io.stringwriter]
@@ -189,7 +197,7 @@ TextReader i = new StringReader("hello");
 
 ## Code fix
 
-The code fix introduces an option to add a `using` keyword before `var` or the
+The code fix provides an option to add a `using` keyword before `var` or the
 type name.
 
 ## Example

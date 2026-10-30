@@ -11,7 +11,7 @@
 
 ## Summary
 
-Use &ldquo;`… is null`&rdquo; or &ldquo;`… is {}`&rdquo; instead of
+Use &ldquo;`… is null`&rdquo; or &ldquo;`!(… is {})`&rdquo; instead of
 &ldquo;`… == null`.&rdquo;
 
 ## Default severity
@@ -20,7 +20,7 @@ Info
 
 ## Description
 
-This rule reports diagnostic information of using the equality operators
+This rule reports diagnostics for using the equality operators
 (&ldquo;`==`&rdquo; and &ldquo;`!=`&rdquo;) with `null` as follows:
 
 - The operator is either &ldquo;`==`&rdquo; or &ldquo;`!=`.&rdquo;
@@ -34,10 +34,10 @@ Note that the default diagnostic severity of this analyzer is
 
 ## Code fix
 
-The code fix provides an option replacing the expressions
+The code fix provides an option to replace the expressions
 &ldquo;`… == null`&rdquo; and &ldquo;`… != null`&rdquo; with
 &ldquo;`… is null`&rdquo; and &ldquo;`!(… is null)`,&rdquo; respectively.
-Also, it provides another option replacing them with &ldquo;`!(… is {})`&rdquo;
+Also, it provides another option to replace them with &ldquo;`!(… is {})`&rdquo;
 and &ldquo;`… is {}`,&rdquo; respectively.
 
 ### Remarks
@@ -46,8 +46,8 @@ It can be a breaking change to replace the expression &ldquo;`… == null`&rdquo
 with &ldquo;`… is null`,&rdquo; as well as &ldquo;`… != null`&rdquo; with
 &ldquo;`!(… is null)`,&rdquo; and vice versa.  For example, the expressions
 &ldquo;`o is null`&rdquo; and &ldquo;`o == null`&rdquo; result in
-[the same IL code][example-same-il-codes] as long as its equality operators
-are not overridden, as follows:
+[the same IL code][example-same-il-code] as long as the type of `o` does not
+overload the equality operators, as follows:
 
 ```cs
 class C
@@ -70,8 +70,9 @@ class C
 }
 ```
 
-However, when its equality operators are overridden, those expressions result
-in [different IL codes][example-different-il-codes], as follows:
+However, when the type of `o` overloads the equality operators, those
+expressions result in [different IL code][example-different-il-code], as
+follows:
 
 ```cs
 class C
@@ -100,8 +101,8 @@ class C
 }
 ```
 
-Note that the result of &ldquo;`o == null`&rdquo; may differ from the one of
-&ldquo;`o is null`&rdquo; if the equality operators are *strangely* overridden
+Note that the result of &ldquo;`o == null`&rdquo; may differ from that of
+&ldquo;`o is null`&rdquo; if the equality operators are *strangely* overloaded
 as follows:
 
 ```cs
@@ -157,7 +158,7 @@ public void Method(object? o, string? s)
   https://docs.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.diagnosticseverity?view=roslyn-dotnet
 [fig-EqualsNull]:
   https://maroontress.github.io/StyleChecker/images/EqualsNull.png
-[example-same-il-codes]:
+[example-same-il-code]:
   https://sharplab.io/#v2:EYLgtghgzgLgpgJwDQxASwDYB8ACAmAAgGEBYAKAG9yCaDgB7ejAgSSgDkBXDDACiIL0AlNVpiAvAD5BBNFAIA7bhgDc5UTQZMCAUQCOnCBg7L+gkWTETp9AuPGLlasgF9yQA===
-[example-different-il-codes]:
+[example-different-il-code]:
   https://sharplab.io/#v2:EYLgtghgzgLgpgJwDQxASwDYB8ACAmAAgGEBYAKAG9yCaDgB7ejAgSSgDkBXDDACiIL0AlNVpiAvAD5BBNFAIA7bhgDc5UTQZMCAUQCOnCBg7L+gkWTETp9AuPGLlashoI4AzG4CMANjqNmegAHRAgYegR7AjN6LyRiQTwLK1opQWAAKzgAYxgAOgAlOAAzRDgFbLh9Q2NeWPj6JOdXD28/LUCQhDCIgEIHGLiExuSUu2le+kyc/KLShHLK6qMoOqGR5wBfciA==

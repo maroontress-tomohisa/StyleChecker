@@ -39,19 +39,22 @@ Info
 
 This rule reports diagnostics when a local variable of a reference type is
 declared and immediately subjected to a null check. With a declaration pattern,
-you can declare a new local variable initialized with a nullable value or
-reference and then check whether the value is `null`.
+you can declare a new local variable initialized with a reference value that
+may be `null` and then check whether the value is `null`.
 
 When the local variable declaration is an explicit type declaration and has
 multiple declarators, this analyzer only covers the last variable.
 
-This analyzer will only issue diagnostics if all of the following conditions are
-true:
+This rule reports diagnostics only if all of the following conditions are true:
 
-- the type of the declared local variable is a nullable reference type
-- the expression of the initial value is nullable<sup>&dagger;</sup> (when the
-  [nullable context][] is enabled)
-- the local variable is unused when it may be `null`
+- the type of the declared local variable is a nullable reference type (for
+  example, `string?` if the [nullable context][] is enabled, or `string` if it
+  is disabled)
+- the initial value may or may not be `null`<sup>&dagger;</sup>, as determined
+  by the compiler's flow analysis (this condition applies only when the
+  nullable context is enabled)
+- the rewrite with a declaration pattern does not leave a read of the variable
+  at a point where it is not definitely assigned (see below)
 
 > &dagger; If the initial value is always `null` or never `null`, the null check
 > after the declaration makes no sense.
@@ -104,21 +107,25 @@ else
     // foo is assigned (and not null) here
     ⋮
 }
-// foo is unassigned here (*2)
+// foo is not definitely assigned here (*2)
 ⋮
 ```
 
-The type of `foo` is `string`, which is a non-nullable reference type. After the
-`if` statement (*2), `foo` is unassigned. If the state is assigned or
-unassigned, it is finally unassigned.
+The type of `foo` is `string`, which is a non-nullable reference type. In the
+_then_ clause, `foo` is unassigned because the pattern did not match. In the
+_else_ clause, `foo` is assigned. After the `if` statement (*2), `foo` is not
+definitely assigned, because it is unassigned on one of the two paths.
 
 Before the substitution, when `foo` may be `null`, using `foo` as a non-`null`
-reference raises a warning like CS8604. But after the substitution, it raises an
-error CS0165 (use of unassigned local variable). That is, this code fix changes
-the `null` variable to the unassigned one. In other words, `null` or not `null`
-changes to unassigned or not `null`. Using a local variable that may be `null`
-doesn't cause an error, but using an unassigned local variable does. So this
-analyzer must ignore those cases where the code fix causes errors.
+reference raises a warning like CS8604. But after the substitution, using `foo`
+at a point where it is not definitely assigned raises an error CS0165 (use of
+unassigned local variable). That is, this code fix changes `foo` from a
+variable that may be `null` to a variable that may be unassigned. In other
+words, the states “`null` or not `null`” change to “unassigned or not `null`.”
+Unless your project treats those warnings as errors, using a local variable
+that may be `null` doesn't cause an error, but using an unassigned local
+variable does. So this analyzer must ignore those cases where the code fix
+causes errors.
 
 > 🚩 The [IDE0019][] in Visual Studio 2022 works the same way.
 
@@ -134,9 +141,9 @@ if (file is null)
 File.ReadAllText(file);
 ```
 
-Adding a `throw` statement or an assignment of non-`null` reference to `file` at
-the last of the _then_ clause eliminates CS8604 so that this analyzer raises the
-diagnostic. It raises a diagnostic against the following code:
+Adding a `throw` statement or an assignment of a non-`null` reference to `file`
+at the end of the _then_ clause eliminates CS8604, so this rule reports a
+diagnostic for the following code:
 
 ```csharp
 string? file = Environment.GetEnvironmentVariable("FILE");
@@ -148,7 +155,7 @@ if (file is null)
 File.ReadAllText(file);
 ```
 
-And the code fix is also available. It also works against the following code:
+And the code fix is also available. It works with the following code:
 
 ```csharp
 string? file = Environment.GetEnvironmentVariable("FILE");
@@ -172,7 +179,7 @@ relationship between those combinations and code fixes.
 | Declaration | Condition | Code Fix |
 | :---: | :---: | :---: |
 | `var foo = …;` | NotNull | `if (… is {} foo)` |
-| `var foo = …;` | Null | `if (… is {} not foo)` |
+| `var foo = …;` | Null | `if (… is not {} foo)` |
 | `Bar? foo = …;` | NotNull | `if (… is Bar foo)` |
 | `Bar? foo = …;` | Null | `if (… is not Bar foo)` |
 
@@ -182,8 +189,10 @@ relationship between those combinations and code fixes.
 | Null | `(foo is null)`, `(foo is not {})`, or `(foo == null)` |
 
 Note that `foo` represents the name of a local variable, and `Bar` represents
-the type name. Conditions containing the [logical negation operator][] (`!`) are
-not covered (e.g., `(!(foo == null))`, `(!(foo is null))`).
+the type name. The declaration `Bar foo = …;` without the nullable annotation
+(for example, when the nullable context is disabled) is treated in the same way
+as `Bar? foo = …;`. Conditions containing the [logical negation operator][]
+(`!`) are not covered (e.g., `(!(foo == null))`, `(!(foo is null))`).
 
 ### Remarks
 

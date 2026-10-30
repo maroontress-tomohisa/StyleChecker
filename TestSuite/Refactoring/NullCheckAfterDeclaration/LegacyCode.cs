@@ -162,13 +162,13 @@ public sealed class Code
         //@ ^implicitVar
         if (implicitVar != null)
         {
-            // implicitVar is null
+            // implicitVar is not null
         }
         string explicitVar = Foo();
         //@    ^explicitVar
         if (explicitVar != null)
         {
-            // explicitVar is null
+            // explicitVar is not null
         }
     }
 

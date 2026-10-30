@@ -19,34 +19,35 @@ Warning
 
 ## Description
 
-Specifying the explicit type of the array creation is redundant if the type of
-the array instance can be inferred from the elements specified in the array
-initializer. Note that \[[1](#ref1)\]:
+Specifying the explicit element type of the array creation is redundant if the
+type of the array instance can be inferred from the elements specified in the
+array initializer. Note that \[[1](#ref1)\]:
 
 > You can create an implicitly typed array in which the type of the array
 > instance is inferred from the elements specified in the array initializer.
 
 ### Remarks
 
-There are some cases where type inference does not work so that the implicitly
-typed arrays are not available. For example, it doesn't work when all elements
-are one of the following:
+In some cases, the compiler cannot infer the array's element type, so an
+implicitly typed array is not available. This occurs, for example, when every
+element is one of the following:
 
 - Target-typed `new` expression \[[2](#ref2)\] (`new(…)`)
 - Collection expression (`[…]`)
 - `null` literal
 - `default` literal
+- Anonymous method (`delegate { … }`)
+- Lambda expression that has no natural type (e.g., `x => x`)
 
-There are also some cases where the implicitly typed arrays change the meaning.
-For example, the element of `array` is of type `int?` (`Nullable<int>`) in the
-following code:
+There are also some cases where an implicitly typed array has a different
+meaning. For example, the element type of `array` is `int?` (`Nullable<int>`)
+in the following code:
 
 ```cs
 var array = new int?[] { 42, };
 ```
 
-Let's leave the array initializer and remove `int?` from the code. Then, the
-element of `array` is of type `int`, as follows:
+If you remove `int?` from the code, the element type of `array` becomes `int`:
 
 ```cs
 var array = new[] { 42, };
@@ -55,7 +56,7 @@ var array = new[] { 42, };
 ### C# 9 and earlier versions
 
 Before C# 10, the implicitly typed array creation causes an error CS0826 when
-all elements are Method References as follows:
+all elements are method groups as follows:
 
 ```csharp
 public static void RaiseCS0826()
@@ -74,7 +75,7 @@ public static void DoSomething()
 > [See errors in C# 9][sharplab:examples]
 
 This analyzer ignores the explicitly typed arrays where all the elements are
-Method References in C# 9 and earlier.
+method groups in C# 9 and earlier.
 
 ### Alternatives
 
@@ -88,8 +89,8 @@ var array = new[]
 };
 ```
 
-If it is desirable to describe `Foo` less often, you can refactor this code as
-follows:
+If you want to write `Foo` fewer times than in the code above, you can refactor
+this code as follows:
 
 ```cs
 var array = new Foo[]
@@ -99,8 +100,11 @@ var array = new Foo[]
 };
 ```
 
-In most cases, collection expressions are preferable to implicitly typed array
-creations:
+Since all the elements are target-typed `new` expressions, this analyzer does
+not report this code.
+
+In most cases, collection expressions (C# 12 or later) are preferable to
+implicitly typed array creations:
 
 ```cs
 // Collection expression
@@ -114,7 +118,8 @@ public IEnumerable<string> GetStrings() => new[] {"foo", "bar"};
 
 ## Code fix
 
-The code fix provides an option removing the explicit type of the array.
+The code fix provides an option to remove the explicit element type of the
+array creation.
 
 ## Example
 

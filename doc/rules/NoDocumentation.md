@@ -21,11 +21,11 @@ Warning
 
 ## Description
 
-### To enable the diagnostics for your project
+### To enable the diagnostics in your project
 
-Note that this diagnostics is emitted
-only when [`/doc` compiler option][doc-compiler-option] is specified.
-If you use Visual Studio 2019, set this compiler option as follows:
+This rule reports diagnostics
+only when the [`/doc` compiler option][doc-compiler-option] is specified.
+If you use Visual Studio 2022, set this compiler option as follows:
 
 > 1. Open the project's Properties page (Project &#x279c; _project name_
 >    Properties...)
@@ -33,10 +33,10 @@ If you use Visual Studio 2019, set this compiler option as follows:
 > 3. Modify the XML documentation file property (turn on the checkbox and
 >    specify the path)
 
-### To ignore something with the specified attribute
+### To ignore diagnostics for types and members with a specified attribute
 
-This analyzer can be configured to ignore diagnostics, for example,
-for test methods like the following code:
+For example, you can configure this rule to ignore diagnostics for test methods
+like this:
 
 ```csharp
 [TestMethod]
@@ -46,7 +46,7 @@ public void Foo()
 }
 ```
 
-To do so, edit `StyleChecker.xml` file as follows:
+To do so, edit the `StyleChecker.xml` file as follows:
 
 <!-- markdownlint-disable MD013 -->
 ```xml
@@ -61,8 +61,8 @@ To do so, edit `StyleChecker.xml` file as follows:
 ```
 <!-- markdownlint-enable MD013 -->
 
-Further more, for example, if you would like ignore test classes wholly
-(namely, ignore them and all they contain) like the following code:
+You may also want to ignore test classes and everything they contain, as shown
+in the following code:
 
 ```csharp
 [TestClass]
@@ -72,7 +72,7 @@ public sealed class FooTest
 }
 ```
 
-To do so, edit `StyleChecker.xml` file as follows:
+If so, edit the `StyleChecker.xml` file as follows:
 
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>

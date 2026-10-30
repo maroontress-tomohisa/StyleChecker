@@ -176,8 +176,8 @@ public void NoDiscardParameter() {
 
 The code fix provides an option to replace the identifier with `underscore` if
 the identifier contains only `_` (a single underscore character). Otherwise, it
-provides an option of eliminating underscores in the identifier and
-concatenating words in the camel case style.
+provides an option to eliminate underscores in the identifier and concatenate
+words in the camel case style.
 
 ## Example
 
