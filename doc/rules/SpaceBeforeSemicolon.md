@@ -11,7 +11,7 @@
 
 ## Summary
 
-A semicolon must not be preceded by a white space.
+A semicolon must not be preceded by whitespace.
 
 ## Default severity
 
@@ -27,7 +27,7 @@ infinite `for` loop with `for (;;)`.
 
 ## Code fix
 
-The code fix provides an option eliminating spaces before the semicolon.
+The code fix provides an option to eliminate spaces before the semicolon.
 
 ## Example
 

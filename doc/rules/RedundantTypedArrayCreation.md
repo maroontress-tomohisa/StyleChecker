@@ -45,8 +45,7 @@ following code:
 var array = new int?[] { 42, };
 ```
 
-Let's leave the array initializer and remove `int?` from the code. Then, the
-element of `array` is of type `int`, as follows:
+If you remove `int?` from the code, the element type of `array` becomes `int`:
 
 ```cs
 var array = new[] { 42, };
@@ -114,7 +113,7 @@ public IEnumerable<string> GetStrings() => new[] {"foo", "bar"};
 
 ## Code fix
 
-The code fix provides an option removing the explicit type of the array.
+The code fix provides an option to remove the explicit type of the array.
 
 ## Example
 

@@ -12,7 +12,8 @@
 ## Summary
 
 Replace a `System.Type` parameter in a method or local function with a generic
-type parameter when all arguments passed to it are `typeof(…)` expressions.
+type parameter when all the arguments corresponding to that parameter are
+`typeof(…)` expressions.
 
 ## Default severity
 
@@ -20,8 +21,8 @@ Warning
 
 ## Description
 
-This analyzer identifies method or local function parameters of type
-`System.Type` that are _always_ invoked with `typeof(…)` expressions. In such
+This analyzer identifies the method or local function that is _always_ invoked
+with `typeof(…)` expressions for its parameters of type `System.Type`. In such
 cases, the parameter can be safely replaced with a generic type parameter `T`,
 which improves type safety and readability.
 

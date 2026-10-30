@@ -19,8 +19,7 @@ Warning
 
 ## Description
 
-You should assign an initial value to the local variable always when it is
-declared.
+You should assign an initial value to a local variable whenever it is declared.
 
 ## Code fix
 

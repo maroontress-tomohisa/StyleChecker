@@ -11,7 +11,7 @@
 
 ## Summary
 
-Remove a Byte Order Mark (BOM) of the file encoded in UTF-8.
+Remove the Byte Order Mark (BOM) from files encoded in UTF-8.
 
 ## Default severity
 
@@ -19,8 +19,8 @@ Warning
 
 ## Description
 
-This rule reports diagnostic information of the following files starting with
-a UTF-8 BOM.
+This rule reports diagnostics for the following files if they start with a
+UTF-8 BOM:
 
 - C# source files that the project contains (except auto-generated files)
 - files specified with the configuration file `StyleChecker.xml`
@@ -41,12 +41,11 @@ matches `*.Designer.cs` in any directory of the project, edit
 </config>
 ```
 
-The `ByteOrderMark` element can have `maxDepth` attribute and `files`
-elements zero or more times as its child elements. The value of the
-`maxDepth` attribute is used as the maximum number of directory levels to
-search (the default value is 16). The `glob` attribute's value of the
-`files` element represents the *pattern*, which matches the paths of the
-files to find.
+The `ByteOrderMark` element can have a `maxDepth` attribute and zero or more
+`files` child elements. The value of the `maxDepth` attribute is used as the
+maximum number of directory levels to search (the default value is 16). The
+`glob` attribute of the `files` element specifies the *pattern*, which matches
+the paths of the files to find.
 
 The path separator in the pattern must be a slash ('`/`') character
 regardless of the platform. The directory names `.` and `..` are not
@@ -61,7 +60,7 @@ place the configuration file in the project root directory.
 
 The pattern can contain an asterisk ('`*`') character as a wildcard,
 which matches any character other than a slash zero or more times.
-It can also contain a double asterisk ('`**`'), which represents as follows:
+It can also contain a double asterisk ('`**`'), which works as follows:
 
 - if the pattern equals `**`, it matches all files in the directory containing
   the configuration file and in its subdirectories.
@@ -74,9 +73,10 @@ It can also contain a double asterisk ('`**`'), which represents as follows:
   and its subdirectories. For example, `**/foo` matches `foo`, `bar/foo` and
   `bar/baz/foo`.
 
-- if the pattern contains `/**/`, the subpattern `/**/` matches a slash,
-  the directories and subdirectories. For example, `foo/**/bar` matches
-  `foo/bar`, `foo/baz/bar` and `foo/baz/qux/bar`.
+- if the pattern contains `/**/`, the subpattern `/**/` matches a slash
+  followed by zero or more directory names, each followed by a slash. For
+  example, `foo/**/bar` matches `foo/bar`, `foo/baz/bar` and
+  `foo/baz/qux/bar`.
 
 ## Code fix
 

@@ -11,7 +11,7 @@
 
 ## Summary
 
-Use &ldquo;`… == null`&rdquo; or &ldquo;`… is {}`&rdquo; instead of
+Use &ldquo;`… == null`&rdquo; or &ldquo;`!(… is {})`&rdquo; instead of
 &ldquo;`… is null`.&rdquo;
 
 ## Default severity
@@ -20,18 +20,18 @@ Info
 
 ## Description
 
-This rule reports diagnostic information of using `is` pattern matching with
-the `null` Constant Pattern.
+This rule reports diagnostics for using `is` pattern matching with the `null`
+constant pattern.
 
 Note that the default diagnostic severity of this analyzer is
 [Information][diagnostic-severity].
 
 ## Code fix
 
-The code fix provides an option replacing the expressions
+The code fix provides an option to replace the expressions
 &ldquo;`… is null`&rdquo; and &ldquo;`!(… is null)`&rdquo; with
 &ldquo;`… == null`&rdquo; and &ldquo;`… != null`,&rdquo; respectively.  Also,
-it provides another option replacing them with &ldquo;`!(… is {})`&rdquo; and
+it provides another option to replace them with &ldquo;`!(… is {})`&rdquo; and
 &ldquo;`… is {}`,&rdquo; respectively.
 
 ### Remarks

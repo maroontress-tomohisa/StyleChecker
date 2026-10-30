@@ -22,28 +22,26 @@ Warning
 This is something like the C# version of
 [_DesignForExtension check_][design-for-extension-checkstyle]
 of Checkstyle\[[1](#ref1)\].
-This rule reports diagnostic information of classes that have
+This rule reports diagnostics for classes that have
 a non-empty overridable method or property as follows:
 
-- The `virtual` method which is `public` or `protected`
-and implementation of which is not empty
+- The `virtual` method which is `public` or `protected` and whose
+  implementation is not empty
 - The `virtual` property which is `public` or `protected`
 
-This rule prevents
-[_the fragile base class problem_][fragile-base-class] \[[2](#ref2)\].
-And it also prevents [_Call Super_][call-super] \[[2](#ref2)\],
-_neutralizing_ a call to the overridden method
-of the base class, that is, invoking `base`._Method_(...) in C#.
+This rule prevents [_the fragile base class problem_][fragile-base-class]
+\[[2](#ref2)\]. It also prevents [_Call Super_][call-super] \[[2](#ref2)\] by
+_neutralizing_ a call to the overridden method of the base class, that is,
+invoking `base`._Method_(...) in C#: the `virtual` method must be empty or
+`abstract`, so the base implementation has nothing worth calling.
 
 ## Code fix
 
-The code fix is not provided. Refactor the `virtual` method to be
-empty or `abstract` one, for example, using the
-[_Template Method Pattern_][template-method-pattern]
-\[[3](#ref3)\].
-And then, change the `override` method (this is, the method
-overriding the method of the base class) to be `sealed`, or change
-the class to be `sealed`.
+The code fix is not provided. Make the `virtual` method empty or `abstract`,
+for example, using the [_Template Method Pattern_][template-method-pattern]
+\[[3](#ref3)\]. And then, change the `override` method (that is, the method
+overriding the base-class method) to be `sealed`, or change the class to be
+`sealed`.
 
 ## Example
 

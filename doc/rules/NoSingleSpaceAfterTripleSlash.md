@@ -11,8 +11,8 @@
 
 ## Summary
 
-Triple slash `///` (Single Line Documentation Comment) should be followed
-by a single space.
+Triple slash `///` (single-line documentation comment) should be followed by a
+single whitespace character.
 
 ## Default severity
 
@@ -22,7 +22,7 @@ Warning
 
 This is a replacement for [SA1004][sa1004].
 
-StyleCop.Analyzers (1.1.118) emits SA1004 to the following code:
+StyleCop.Analyzers (1.1.118) reports SA1004 for the following code:
 
 ```csharp
 /// <seealso cref="LineBreakInsideAttribute
@@ -38,18 +38,17 @@ public void LineBreakInsideAttribute(string a, string b)
 }
 ```
 
-This analyzer does not report diagnostics to the code, which includes
-a line break inside the start/end tags of an XML element,
-as long as a single space follows `///`.
+This analyzer does not report diagnostics for the code above, in which a line
+break occurs inside the start or end tag of an XML element, as long as a single
+whitespace character follows `///`.
 
 ## Remarks
 
-It is not sufficient to write a `///` followed by a single whitespace character.
-More precisely, `///` must be followed by a single whitespace character followed
-by an XML Element (`<element>…</element>` or `<element … />`). If the XML
-element is long, it can be wrapped, but each wrapped line must begin with `///`
-followed by one or more whitespace characters. The following is a conformance
-example:
+It is not sufficient to write a `///` followed by a single whitespace
+character; the whitespace character must also be followed by an XML element
+(`<element>…</element>` or `<element … />`). If the XML element is long, it can
+be wrapped, but each wrapped line must begin with `///` followed by one or more
+whitespace characters. The following is a conformance example:
 
 ```csharp
 /// <summary>Hello.</summary>
@@ -90,10 +89,10 @@ Even after version 2.0.1, [StrayText][] analyzer reports `Bad()` and
 
 ## Code fix
 
-The code fix provides an option inserting a single space after `///`,
-or replacing two or more spaces after `///` with a single space.
-Note that Code Fix provider keeps two or more spaces in the text content
-of an XML element, as well as SA1004.
+The code fix provides an option to insert a single space after `///`, or to
+replace two or more whitespace characters after `///` with a single space. Note
+that the code-fix provider keeps two or more spaces in the text content of an
+XML element, as the code fix for SA1004 does.
 
 ## Example
 
