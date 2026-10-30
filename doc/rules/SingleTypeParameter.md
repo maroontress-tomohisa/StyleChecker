@@ -11,7 +11,7 @@
 
 ## Summary
 
-Use `T` as the type parameter name if the type parameter is single.
+Use `T` as the type parameter name if there is only one type parameter.
 
 ## Default severity
 

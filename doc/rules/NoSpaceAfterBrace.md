@@ -11,8 +11,7 @@
 
 ## Summary
 
-A brace (&lsquo;`{`&rsquo; or &lsquo;`}`&rsquo;) must be followed by a white
-space.
+A brace (&lsquo;`{`&rsquo; or &lsquo;`}`&rsquo;) must be followed by whitespace.
 
 ## Default severity
 
@@ -24,8 +23,8 @@ An opening brace (&lsquo;`{`&rsquo;) or a closing brace (&lsquo;`}`&rsquo;) that
 is not the last character on the line must generally be followed by whitespace.
 
 Note that this analyzer and the [NoSpaceBeforeBrace][] analyzer are intended to
-be used together and replace [SA1012][] and [SA1013][] with them, allowing us to
-write empty braces (`{}`) as follows:
+be used together. These analyzers replace [SA1012][] and [SA1013][] while
+allowing us to write empty braces (`{}`) as follows:
 
 ```csharp
 Action doNothing = () => {};
@@ -84,7 +83,7 @@ var text = $"{value}";
 
 ## Code fix
 
-The code fix provides an option inserting a space after the brace.
+The code fix provides an option to insert a space after the brace.
 
 ## Example
 

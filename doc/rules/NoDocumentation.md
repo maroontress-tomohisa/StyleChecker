@@ -23,7 +23,7 @@ Warning
 
 ### To enable the diagnostics for your project
 
-Note that this diagnostics is emitted
+This rule reports diagnostics
 only when [`/doc` compiler option][doc-compiler-option] is specified.
 If you use Visual Studio 2019, set this compiler option as follows:
 
@@ -46,7 +46,7 @@ public void Foo()
 }
 ```
 
-To do so, edit `StyleChecker.xml` file as follows:
+To do so, edit the `StyleChecker.xml` file as follows:
 
 <!-- markdownlint-disable MD013 -->
 ```xml
@@ -61,8 +61,8 @@ To do so, edit `StyleChecker.xml` file as follows:
 ```
 <!-- markdownlint-enable MD013 -->
 
-Further more, for example, if you would like ignore test classes wholly
-(namely, ignore them and all they contain) like the following code:
+You may also want to ignore test classes and everything they contain, as shown
+in the following code:
 
 ```csharp
 [TestClass]
@@ -72,7 +72,7 @@ public sealed class FooTest
 }
 ```
 
-To do so, edit `StyleChecker.xml` file as follows:
+If so, edit the `StyleChecker.xml` file as follows:
 
 ```xml
 <?xml version="1.0" encoding="utf-8" ?>

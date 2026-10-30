@@ -39,10 +39,10 @@ idiom because it is easier to describe RAII in C#.
 
 ### Remarks
 
-This analyzer only triggers diagnostics if the local variable is declared and
-initialized with the `new` operator. It ignores the declaration of the local
-variable that is initialized with an `IDisposable` instance any function or
-property returns, as follows:
+This rule reports a diagnostic only when the local variable is declared and
+initialized with the `new` operator. It ignores a local variable declaration if
+a method or property returns the `IDisposable` instance that initializes it.
+For example:
 
 ```csharp
 // OK

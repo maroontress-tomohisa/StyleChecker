@@ -49,8 +49,8 @@ For example, following code invoking `ReadByte()` method in the `for` loop
 is reported with the diagnostic:
 
 ```csharp
-BinaryReader reader = ...;
-byte[] buffer = ...;
+BinaryReader reader = …;
+byte[] buffer = …;
 
 for (var i = 0; i < 1000; ++i)
 {
@@ -62,8 +62,8 @@ The `for` loop and invoking `ReadByte()` method can be replaced with
 the `readFully`-like code as follows:
 
 ```csharp
-BinaryReader reader = ...;
-byte[] buffer = ...;
+BinaryReader reader = …;
+byte[] buffer = …;
 
 var offset = 0;
 var length = 1000;
@@ -79,12 +79,13 @@ while (length > 0)
 }
 ```
 
-If the underlying stream `reader.BaseStream` has always available data
-except for end of stream, it is more simply rewritten as follows:
+One might think that if the underlying stream `reader.BaseStream` always has
+available data except at the end of the stream, it can be rewritten more simply
+as follows:
 
 ```csharp
-BinaryReader reader = ...;
-byte[] buffer = ...;
+BinaryReader reader = …;
+byte[] buffer = …;
 
 var size = reader.Read(buffer, 0, 1000);
 if (size < 1000)
@@ -93,11 +94,10 @@ if (size < 1000)
 }
 ```
 
-However, even `System.IO.MemoryStream` doesn't guarantee
-to read requested bytes when the end of the stream has not been reached.
-See the specifications of
-[MemoryStream.Read Method][system.io.memorystream.read]
-\[[1](#ref1)\], which are quoted as follows:
+However, even `System.IO.MemoryStream` doesn't guarantee to read requested
+bytes when the end of the stream has not been reached. See the specifications
+of [MemoryStream.Read Method][system.io.memorystream.read] \[[1](#ref1)\],
+which are quoted as follows:
 
 > The `Read` method will return zero only if the end of the stream is
 > reached. In all other cases, `Read` always reads at least one byte from
@@ -110,7 +110,7 @@ See the specifications of
 
 ## Code fix
 
-The code fix provides an option replacing the `for` loop with a code
+The code fix provides an option to replace the `for` loop with a code
 fragment, declaring an `Action` delegate and invoking it. You
 should refactor the auto-generated code with renaming identifiers and
 replacing the delegate with the local function or extension method

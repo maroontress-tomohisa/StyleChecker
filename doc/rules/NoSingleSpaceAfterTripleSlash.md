@@ -22,7 +22,7 @@ Warning
 
 This is a replacement for [SA1004][sa1004].
 
-StyleCop.Analyzers (1.1.118) emits SA1004 to the following code:
+StyleCop.Analyzers (1.1.118) reports SA1004 for the following code:
 
 ```csharp
 /// <seealso cref="LineBreakInsideAttribute
@@ -90,8 +90,8 @@ Even after version 2.0.1, [StrayText][] analyzer reports `Bad()` and
 
 ## Code fix
 
-The code fix provides an option inserting a single space after `///`,
-or replacing two or more spaces after `///` with a single space.
+The code fix provides an option to insert a single space after `///`,
+or to replace two or more spaces after `///` with a single space.
 Note that Code Fix provider keeps two or more spaces in the text content
 of an XML element, as well as SA1004.
 

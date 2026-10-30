@@ -20,7 +20,7 @@ Info
 
 ## Description
 
-This rule reports diagnostic information of using the equality operators
+This rule reports diagnostics for using the equality operators
 (&ldquo;`==`&rdquo; and &ldquo;`!=`&rdquo;) with `null` as follows:
 
 - The operator is either &ldquo;`==`&rdquo; or &ldquo;`!=`.&rdquo;
@@ -34,10 +34,10 @@ Note that the default diagnostic severity of this analyzer is
 
 ## Code fix
 
-The code fix provides an option replacing the expressions
+The code fix provides an option to replace the expressions
 &ldquo;`… == null`&rdquo; and &ldquo;`… != null`&rdquo; with
 &ldquo;`… is null`&rdquo; and &ldquo;`!(… is null)`,&rdquo; respectively.
-Also, it provides another option replacing them with &ldquo;`!(… is {})`&rdquo;
+Also, it provides another option to replace them with &ldquo;`!(… is {})`&rdquo;
 and &ldquo;`… is {}`,&rdquo; respectively.
 
 ### Remarks
@@ -47,7 +47,7 @@ with &ldquo;`… is null`,&rdquo; as well as &ldquo;`… != null`&rdquo; with
 &ldquo;`!(… is null)`,&rdquo; and vice versa.  For example, the expressions
 &ldquo;`o is null`&rdquo; and &ldquo;`o == null`&rdquo; result in
 [the same IL code][example-same-il-codes] as long as its equality operators
-are not overridden, as follows:
+are not overloaded, as follows:
 
 ```cs
 class C
@@ -70,7 +70,7 @@ class C
 }
 ```
 
-However, when its equality operators are overridden, those expressions result
+However, when its equality operators are overloaded, those expressions result
 in [different IL codes][example-different-il-codes], as follows:
 
 ```cs
@@ -101,7 +101,7 @@ class C
 ```
 
 Note that the result of &ldquo;`o == null`&rdquo; may differ from the one of
-&ldquo;`o is null`&rdquo; if the equality operators are *strangely* overridden
+&ldquo;`o is null`&rdquo; if the equality operators are *strangely* overloaded
 as follows:
 
 ```cs

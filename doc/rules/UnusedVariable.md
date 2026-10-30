@@ -19,7 +19,7 @@ Warning
 
 ## Description
 
-This rule reports diagnostic information as a warning similar to
+This rule reports diagnostics similar to
 [CS0219 (The variable '...' is assigned but its value is never used)][cs0219],
 [CA1804 (Remove unused locals)][ca1804] and
 [CA1801 (Review unused parameters)][ca1801] but more strictly.
@@ -27,7 +27,8 @@ It reports as follows:
 
 - Unused local variables (including [out variable declarations][out-var]
   and [pattern matching][pattern-matching])
-- Unused parameters of constructors, methods or local functions, except:
+- Unused parameters of constructors, methods, operators, conversion operators,
+  or local functions, except:
   - `interface`
   - `abstract` methods
   - `extern` methods

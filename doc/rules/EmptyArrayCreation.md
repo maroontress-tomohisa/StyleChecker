@@ -26,7 +26,7 @@ only once and be shared.
 
 ## Code fix
 
-The code fix provides an option replacing the empty array creation with
+The code fix provides an option to replace the empty array creation with
 `System.Array.Empty<T>()`.
 
 ## Example

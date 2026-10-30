@@ -21,7 +21,7 @@ Warning
 
 There are delicate methods that return a regardful value,
 or that do not make sense if the return value is discarded.
-This rule reports diagnostic information as a warning similar to
+This rule reports diagnostics similar to
 [CA1806 (Do not ignore method results)][ca1806]\[[1](#ref1)\]
 about discarding the return value of the methods as follows:
 
@@ -68,11 +68,11 @@ unknown, which doesn't make sense.
 There is a useful common pattern using the `readFully`-like code as follows:
 
 ```csharp
-Stream stream = ...;
-byte[] buffer = ...;
-int initialOffset = ...;
-int offset = initialOffset
-int length = ...;
+Stream stream = …;
+byte[] buffer = …;
+int initialOffset = …;
+int offset = initialOffset;
+int length = …;
 
 while (length > 0)
 {
@@ -148,7 +148,7 @@ using Maroontress.StyleChecker.Annotations;
 public class Class
 {
     [return: DoNotIgnore]
-    public void Method()
+    public ImmutableValue Method()
     {
         return new ImmutableValue();
     }

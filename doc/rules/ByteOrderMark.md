@@ -19,7 +19,7 @@ Warning
 
 ## Description
 
-This rule reports diagnostic information of the following files starting with
+This rule reports diagnostics for the following files starting with
 a UTF-8 BOM.
 
 - C# source files that the project contains (except auto-generated files)

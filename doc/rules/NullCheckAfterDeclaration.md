@@ -172,7 +172,7 @@ relationship between those combinations and code fixes.
 | Declaration | Condition | Code Fix |
 | :---: | :---: | :---: |
 | `var foo = …;` | NotNull | `if (… is {} foo)` |
-| `var foo = …;` | Null | `if (… is {} not foo)` |
+| `var foo = …;` | Null | `if (… is not {} foo)` |
 | `Bar? foo = …;` | NotNull | `if (… is Bar foo)` |
 | `Bar? foo = …;` | Null | `if (… is not Bar foo)` |
 

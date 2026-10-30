@@ -19,12 +19,13 @@ Warning
 
 ## Description
 
-Replace `Class<T>.Method()` with `Class.Method<T>()` so that the data type of
-the type parameter `T` can be inferred from the argument or return value.
+Replace `Class<T>.Method()` with `Class.Method<T>()` if `T` appears in the
+method's parameter types, so that the compiler can infer `T` from the
+arguments.
 
 ## Code fix
 
-The code fix provides an option moving the type parameters from the static
+The code fix provides an option to move the type parameters from the static
 class to its methods.
 
 ## Example

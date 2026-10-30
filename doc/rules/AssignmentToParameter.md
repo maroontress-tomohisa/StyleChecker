@@ -19,9 +19,9 @@ Warning
 
 ## Description
 
-This rule reports diagnostic information of assignment to the parameters
-passed _by value_ (except _by reference_). Note that
-\[[1](#ref1)\]:
+This rule reports diagnostics for assignments to parameters passed _by value_.
+Parameters passed _by reference_, that is, those declared with `ref` or `out`,
+are excluded. Note that \[[1](#ref1)\]:
 
 > Do not confuse the concept of passing _by reference_ with the concept of
 > reference types. The two concepts are not the same. A method parameter can be
@@ -30,15 +30,20 @@ passed _by value_ (except _by reference_). Note that
 
 Those who are unfamiliar with C# often assign a new value to the parameters
 passed _by value_, with the intention that the assignment will be reflected in
-the caller's variables. This rule allows them to immediately notice that
-they confused or misled themselves.
+the caller's variables. This rule allows them to immediately notice that they
+had been confused or had misunderstood. The assignment has no effect on the
+caller's variables.
 
-The diagnostic for a parameter passed _by value_ is reported when the method
-does as follows:
+This rule reports a diagnostic for a parameter passed _by value_ when the
+method does any of the following:
 
-- Assign a new value to it
-- Increment or decrement it
-- Pass it to any method as the `ref` or `out` parameter.
+- Assigns a new value to it (including compound assignment such as `+=`)
+- Increments or decrements it
+- Passes it to any method as a `ref` or `out` argument, which allows that
+  method to overwrite it
+
+The implicit parameter `value` of a property's `set` accessor is also treated
+as a parameter passed _by value_, so the same applies to it.
 
 ## Code fix
 

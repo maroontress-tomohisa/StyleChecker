@@ -11,7 +11,7 @@
 
 ## Summary
 
-A semicolon must be followed by a white space.
+A semicolon must be followed by whitespace.
 
 ## Default severity
 
@@ -19,18 +19,17 @@ Warning
 
 ## Description
 
-In most cases, a semicolon is followed by the end of
-the line (EOL). If exceptionally a semicolon is followed by
-other than EOL (e.g. an expression in a `for` statement,
-a comment, and so on), it must be followed by a space.
+In most cases, a semicolon is followed by the end of the line (EOL). If,
+exceptionally, a semicolon is followed by other than EOL (e.g., an expression
+in a `for` statement, a comment, and so on), it must be followed by a space.
 
-However, in the style like _infinite `for` loops_,
-semicolons may not be followed by a space, as follows:
+However, in the style of _infinite `for` loops_, semicolons may not be followed
+by a space, as follows:
 
 ```csharp
 for (;;)
 {
-    ...
+    ⋮
 }
 ```
 
@@ -40,7 +39,7 @@ infinite `for` loop with `for (;;)`.
 
 ## Code fix
 
-The code fix provides an option inserting a space after the semicolon.
+The code fix provides an option to insert a space after the semicolon.
 
 ## Example
 

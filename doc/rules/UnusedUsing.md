@@ -19,15 +19,14 @@ Warning
 
 ## Description
 
-This rule reports diagnostic information of CS8019 (unnecessary using
-directive) as a warning.
+This rule reports diagnostics similar to CS8019 (unnecessary using directive).
 
 Note that CS8019 reports diagnostics for auto-generated files,
 but this analyzer doesn't.
 
 ## Code fix
 
-The code fix is not provided by StyleChecker but provided by Visual Studio IDE.
+StyleChecker does not provide a code fix; the Visual Studio IDE does.
 
 ## Example
 

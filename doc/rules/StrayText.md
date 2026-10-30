@@ -12,7 +12,7 @@
 ## Summary
 
 Text in the [Documentation Comments][microsoft:csharp-documentation-comments]
-\[[1](#ref1)\] must be inside any XML tag.
+\[[1](#ref1)\] must be inside any XML element.
 
 ## Default severity
 
@@ -20,11 +20,10 @@ Warning
 
 ## Description
 
-The documentation comments must not have the top-level text,
-which is not in the XML tag.
-Such a stray text should be fixed.
+The documentation comments must not have the top-level text, which is not in an
+XML element. Such a stray text should be fixed.
 
-For example, I have seen the following code in a certain OSS project:
+For example, the following code appeared in a certain OSS project:
 
 ```csharp
 /// This class is...
@@ -34,7 +33,7 @@ public class DocumentCommentIsNotInsideTag
 }
 ```
 
-The author probably missed the `summary` tag.
+The author probably missed the `summary` element.
 
 Similarly, I have also seen the following code:
 
