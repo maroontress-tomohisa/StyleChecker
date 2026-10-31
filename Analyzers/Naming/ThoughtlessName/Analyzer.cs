@@ -163,18 +163,18 @@ public sealed class Analyzer : AbstractAnalyzer
             .ThoughtlessName;
         var disallowedIdentifierSet = config.GetDisallowedIdentifiers()
             .ToImmutableHashSet();
-        var cancellationToken = context.CancellationToken;
         var model = context.SemanticModel;
-        var root = model.SyntaxTree.GetCompilationUnitRoot(cancellationToken);
+        var root = context.GetCompilationUnitRoot();
+        var symbolizer = context.GetSymbolizer();
+        var empty = Enumerable.Empty<(SyntaxToken, ISymbol, ITypeSymbol)>();
 
         var locals = LocalVariables.Symbols(model)
             .Select(s => (s.Token, s.Symbol as ISymbol, s.Symbol.Type));
         var parameters = LocalVariables.ParameterTokens(root)
-            .Select(t => (Token: t, Node: t.Parent as ParameterSyntax))
-            .Where(x => x.Node is not null)
-            .Select(x => (x.Token, Symbol: model.GetDeclaredSymbol(x.Node!, cancellationToken)))
-            .Where(x => x.Symbol is not null && x.Symbol.Type is not null)
-            .Select(x => (x.Token, Symbol: (ISymbol)x.Symbol!, Type: x.Symbol!.Type));
+            .SelectMany(t => (t.Parent is ParameterSyntax node
+                    && symbolizer.ToSymbol(node) is {} symbol)
+                ? [(t, symbol, symbol.Type)]
+                : empty);
         var all = locals.Concat(parameters)
             .ToList();
         foreach (var (token, symbol, typeSymbol) in all)
