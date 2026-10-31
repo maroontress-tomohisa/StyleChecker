@@ -27,12 +27,13 @@ It reports as follows:
 
 - Unused local variables (including [out variable declarations][out-var]
   and [pattern matching][pattern-matching])
-- Unused parameters of constructors, methods or local functions, except:
+- Unused parameters of constructors (including primary constructors),
+  methods, local functions or indexers, except:
   - `interface`
-  - `abstract` methods
-  - `extern` methods
+  - `abstract` methods or indexers
+  - `extern` methods or indexers
   - `partial` methods without the definition
-  - `virtual` empty methods
+  - `virtual` empty methods or indexers
   - parameters annotated with `UnusedAttribute` provided with
     [StyleChecker.Annotations][stylechecker-annotations]
 - Parameters annotated with `UnusedAttribute` if the annotation is

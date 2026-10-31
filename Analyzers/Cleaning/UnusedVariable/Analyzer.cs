@@ -116,6 +116,21 @@ public sealed class Analyzer : AbstractAnalyzer
                 && pod.ExpressionBody is null;
         }
 
+        static bool IsEmptyIndexer(IndexerDeclarationSyntax node)
+        {
+            if (node.ExpressionBody is not null)
+            {
+                return false;
+            }
+            if (node.AccessorList is not {} list)
+            {
+                return true;
+            }
+            return list.Accessors.All(a =>
+                (a.Body is null || !a.Body.ChildNodes().Any())
+                && a.ExpressionBody is null);
+        }
+
         static bool IsMarkedAsUnused(AttributeData d)
         {
             var clazz = d.AttributeClass;
@@ -134,10 +149,28 @@ public sealed class Analyzer : AbstractAnalyzer
                     && IsEmptyBody(p));
         }
 
+        static bool ShouldIndexerParametersBeUsed(
+            (IndexerDeclarationSyntax Node, IPropertySymbol Symbol) i)
+        {
+            var (node, symbol) = i;
+            return !symbol.IsAbstract
+                && symbol.ContainingType.TypeKind is not TypeKind.Interface
+                && !((symbol.IsExtern || symbol.IsVirtual) && IsEmptyIndexer(node));
+        }
+
         static bool IsParameterMarkedAsUnused(IParameterSymbol p)
         {
             return p.GetAttributes()
                 .Any(IsMarkedAsUnused);
+        }
+
+        static bool IsMatchingParameter(ISymbol s, IParameterSymbol p)
+        {
+            return Symbols.AreEqual(s, p)
+                || (s is IParameterSymbol ps
+                    && ps.Locations.Length > 0
+                    && p.Locations.Length > 0
+                    && ps.Locations[0].Equals(p.Locations[0]));
         }
 
         void Report(IParameterSymbol p, string m)
@@ -156,9 +189,9 @@ public sealed class Analyzer : AbstractAnalyzer
             context.ReportDiagnostic(diagnostic);
         }
 
-        void ReportIfUnnecessarilyMarked(IMethodSymbol m)
+        void ReportIfUnnecessarilyMarked(IEnumerable<IParameterSymbol> parameters)
         {
-            var all = m.Parameters
+            var all = parameters
                 .Where(IsParameterMarkedAsUnused);
             foreach (var p in all)
             {
@@ -182,17 +215,17 @@ public sealed class Analyzer : AbstractAnalyzer
         }
 
         void ReportIfUnusedOrMismarked(
-            (InvocableBaseNodePod Pod, IMethodSymbol Symbol) i)
+            IEnumerable<SyntaxNode> scopeNodes,
+            IEnumerable<IParameterSymbol> parameters)
         {
-            var (pod, m) = i;
-            var identifierNames = pod.Node
-                .DescendantNodes()
+            var identifierNames = scopeNodes
+                .SelectMany(n => n.DescendantNodes())
                 .OfType<IdentifierNameSyntax>();
-            var all = m.Parameters
+            var all = parameters
                 .GroupBy(
                     p => identifierNames.Any(
                         n => FindSymbols(model, n.Identifier)
-                            .Any(s => Symbols.AreEqual(s, p))),
+                            .Any(s => IsMatchingParameter(s, p))),
                     (isUsed, group) => isUsed
                         ? ToAction(group, R.UsedButMarkedAsUnused, b => b)
                         : ToAction(group, R.NeverUsed, b => !b));
@@ -223,16 +256,54 @@ public sealed class Analyzer : AbstractAnalyzer
             .Select(ToInvocation)
             .FilterNonNullValue()
             .ToList();
-        foreach (var i in invocations)
+        foreach (var (pod, symbol) in invocations)
         {
-            if (ShouldParametersBeUsed(i))
+            if (ShouldParametersBeUsed((pod, symbol)))
             {
-                ReportIfUnusedOrMismarked(i);
+                ReportIfUnusedOrMismarked([pod.Node], symbol.Parameters);
             }
             else
             {
-                ReportIfUnnecessarilyMarked(i.Symbol);
+                ReportIfUnnecessarilyMarked(symbol.Parameters);
             }
+        }
+
+        var indexers = root.DescendantNodes()
+            .OfType<IndexerDeclarationSyntax>()
+            .Select(node => (Node: node, Symbol: model.GetDeclaredSymbol(node, cancellationToken)))
+            .Where(i => i.Symbol is not null)
+            .Select(i => (i.Node, Symbol: i.Symbol!))
+            .ToList();
+        foreach (var (node, symbol) in indexers)
+        {
+            if (ShouldIndexerParametersBeUsed((node, symbol)))
+            {
+                ReportIfUnusedOrMismarked([node], symbol.Parameters);
+            }
+            else
+            {
+                ReportIfUnnecessarilyMarked(symbol.Parameters);
+            }
+        }
+
+        var typeDeclarations = root.DescendantNodes()
+            .OfType<TypeDeclarationSyntax>()
+            .Where(t => t.ParameterList is not null);
+        foreach (var typeDecl in typeDeclarations)
+        {
+            if (model.GetDeclaredSymbol(typeDecl, cancellationToken) is not {} typeSymbol
+                || typeSymbol.IsRecord)
+            {
+                continue;
+            }
+            var primaryCtor = typeSymbol.Constructors
+                .FirstOrDefault(c => c.DeclaringSyntaxReferences
+                    .Any(r => r.GetSyntax() == typeDecl));
+            if (primaryCtor is null)
+            {
+                continue;
+            }
+            ReportIfUnusedOrMismarked([typeDecl], primaryCtor.Parameters);
         }
     }
 

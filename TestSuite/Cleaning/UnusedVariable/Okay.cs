@@ -49,6 +49,13 @@ namespace StyleChecker.Test.Cleaning.UnusedVariable
             {
             }
 
+            public abstract int this[int unused] { get; }
+
+            public virtual int this[int unused, int ignored]
+            {
+                set { }
+            }
+
             [DllImport("User32.dll")]
             public static extern void ExternMethod(int unused);
         }
@@ -61,10 +68,14 @@ namespace StyleChecker.Test.Cleaning.UnusedVariable
         public interface IInterface
         {
             void Method(int unused);
+
+            int this[int unused] { get; }
         }
 
         public sealed class Concrete : Abstract
         {
+            public override int this[int value] => value;
+
             public override void Method(int value)
             {
                 CustomizePoint(value);
@@ -127,4 +138,39 @@ namespace StyleChecker.Test.Cleaning.UnusedVariable
             Print("foo", s => "bar");
         }
     }
+
+    public class IndexerOkay
+    {
+        private int[] arr = new int[10];
+
+        public int this[int i] => arr[i];
+
+        public int this[int i, int j]
+        {
+            get => arr[i + j];
+            set => arr[i + j] = value;
+        }
+
+        public string this[[Unused] string ignored] => "";
+    }
+
+    public class PrimaryBase(int x)
+    {
+        public int X => x;
+    }
+
+    public class PrimaryOkay(int a, int b, int c, [Unused] int ignored) : PrimaryBase(a)
+    {
+        private int f = b;
+        public int Prop { get; } = c;
+    }
+
+    public struct PrimaryStructOkay(int a)
+    {
+        public int A => a;
+    }
+
+    public record RecordOkay(int a, int b);
+
+    public record struct RecordStructOkay(int a, int b);
 }

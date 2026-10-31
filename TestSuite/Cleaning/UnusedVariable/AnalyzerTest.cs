@@ -21,7 +21,12 @@ public sealed class AnalyzerTest : DiagnosticVerifier
 
     [TestMethod]
     public void Okay()
-        => VerifyDiagnostic(ReadText("Okay"), Atmosphere.Default);
+    {
+        var ignoreIds = ImmutableArray.Create("CS0219", "CS9113");
+        VerifyDiagnostic(
+            ReadText("Okay"),
+            Atmosphere.Default.WithExcludeIds(ignoreIds));
+    }
 
     [TestMethod]
     public void Code()
@@ -46,7 +51,7 @@ public sealed class AnalyzerTest : DiagnosticVerifier
                 Analyzer.DiagnosticId,
                 $"The {type} '{name}': {detail}.");
         }
-        var ignoreIds = ImmutableArray.Create("CS0219");
+        var ignoreIds = ImmutableArray.Create("CS0219", "CS9113");
         VerifyDiagnostic(
             code,
             Atmosphere.Default.WithExcludeIds(ignoreIds),

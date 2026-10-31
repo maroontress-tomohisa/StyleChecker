@@ -99,6 +99,15 @@ namespace StyleChecker.Test.Cleaning.UnusedVariable
             //@                                         ^${p},unused,${unnecessaryMark}
         {
         }
+
+        public abstract int this[[Unused] int unused] { get; }
+            //@                               ^${p},unused,${unnecessaryMark}
+
+        public virtual int this[[Unused] int unused, int dummy]
+            //@                              ^${p},unused,${unnecessaryMark}
+        {
+            set { }
+        }
     }
 
     public struct Struct
@@ -112,5 +121,44 @@ namespace StyleChecker.Test.Cleaning.UnusedVariable
         //@                       ^${p},unused,${neverUsed}
         {
         }
+    }
+
+    public class IndexerCode
+    {
+        public int this[int unused]
+        //@                 ^${p},unused,${neverUsed}
+            => 0;
+
+        public int this[int used, int unused]
+        //@                           ^${p},unused,${neverUsed}
+        {
+            get => used;
+        }
+
+        public string this[[Unused] string wronglyMarked]
+        //@                                ^${p},wronglyMarked,${usedButMarked}
+            => wronglyMarked;
+    }
+
+    public class PrimaryClass(int unused)
+    //@                           ^${p},unused,${neverUsed}
+    {
+    }
+
+    public class PrimaryClassWithUse(int used, int unused)
+    //@                                            ^${p},unused,${neverUsed}
+    {
+        public int Value => used;
+    }
+
+    public struct PrimaryStruct(int unused)
+    //@                             ^${p},unused,${neverUsed}
+    {
+    }
+
+    public class PrimaryMarked([Unused] int wronglyMarked)
+    //@                                     ^${p},wronglyMarked,${usedButMarked}
+    {
+        public int Value => wronglyMarked;
     }
 }
