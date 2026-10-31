@@ -39,7 +39,9 @@ It reports as follows:
 - Parameters annotated with `UnusedAttribute` if the annotation is
   not necessary
 
-Note that it does not report the unused parameters of lambda expressions.
+Note that it does not report the unused parameters of lambda expressions,
+nor does it report positional parameters of records (which implicitly declare
+properties).
 
 A diagnostic CS0219 is given only when a variable is declared with
 a constant initializer and unused. If the initializer has side effects
@@ -61,7 +63,8 @@ CS0219 is not raised as follows:
 (Meanwhile, [CS0168 (The variable '...' is declared but never used)][cs0168]
 is given when a variable is declared without an initializer and unused.)
 
-Furthermore, unused parameters of the constructor or method,
+Furthermore, unused parameters of the constructor (including primary
+constructor), method, local function, or indexer,
 and unused variables declared with Out Variable Declarations or
 Pattern Matching
 do not raise CS0219 as follows:
@@ -100,6 +103,12 @@ public void Local()
 public void Parameter(int arg)
 {
 }
+
+public class Primary(int arg)
+{
+}
+
+public int this[int index] => 0;
 
 public void PatternMatching(object o)
 {
