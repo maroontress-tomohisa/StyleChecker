@@ -1,6 +1,7 @@
 namespace StyleChecker.Test.Refactoring.DiscardingReturnValue
 {
     using System;
+    using System.Collections.Immutable;
     using System.Reflection;
 
     public sealed class Okay
@@ -23,6 +24,62 @@ namespace StyleChecker.Test.Refactoring.DiscardingReturnValue
                 b,
                 t,
                 new object[] {});
+        }
+
+        public void ImmutableArrayClass()
+        {
+            var a = ImmutableArray.Create("a");
+            var b = a.Add("b");
+            _ = b.Length;
+        }
+
+        public void ImmutableDictionaryClass()
+        {
+            var a = ImmutableDictionary.Create<string, string>();
+            var b = a.Add("k", "v");
+            _ = b.Count;
+        }
+
+        public void ImmutableHashSetClass()
+        {
+            var a = ImmutableHashSet.Create("a");
+            var b = a.Add("b");
+            _ = b.Count;
+        }
+
+        public void ImmutableListClass()
+        {
+            var a = ImmutableList.Create("a");
+            var b = a.Add("b");
+            _ = b.Count;
+        }
+
+        public void ImmutableQueueClass()
+        {
+            var a = ImmutableQueue.Create("a");
+            var b = a.Enqueue("b");
+            _ = b.IsEmpty;
+        }
+
+        public void ImmutableSortedDictionaryClass()
+        {
+            var a = ImmutableSortedDictionary.Create<string, string>();
+            var b = a.Add("k", "v");
+            _ = b.Count;
+        }
+
+        public void ImmutableSortedSetClass()
+        {
+            var a = ImmutableSortedSet.Create("a");
+            var b = a.Add("b");
+            _ = b.Count;
+        }
+
+        public void ImmutableStackClass()
+        {
+            var a = ImmutableStack.Create("a");
+            var b = a.Push("b");
+            _ = b.IsEmpty;
         }
     }
 }
