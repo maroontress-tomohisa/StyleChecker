@@ -11,5 +11,7 @@ System.Collections.Immutable.ImmutableQueue
 System.Collections.Immutable.ImmutableQueue<T>
 System.Collections.Immutable.ImmutableSortedDictionary
 System.Collections.Immutable.ImmutableSortedDictionary<TKey,TValue>
+System.Collections.Immutable.ImmutableSortedSet
+System.Collections.Immutable.ImmutableSortedSet<T>
 System.Collections.Immutable.ImmutableStack
 System.Collections.Immutable.ImmutableStack<T>
