@@ -93,5 +93,42 @@ namespace StyleChecker.Test.Refactoring.IneffectiveReadByte
                     buffer[i] = reader.ReadByte();
                 } while (false);
         }
+
+        public void LessThanWithSameStartAndEnd(
+            BinaryReader reader, byte[] buffer)
+        {
+            for (var i = 5; i < 5; ++i)
+            {
+                buffer[i] = reader.ReadByte();
+            }
+        }
+
+        public void LessThanWithGreaterStart(
+            BinaryReader reader, byte[] buffer)
+        {
+            for (var i = 5; i < 3; ++i)
+            {
+                buffer[i] = reader.ReadByte();
+            }
+        }
+
+        public void LessThanOrEqualWithGreaterStart(
+            BinaryReader reader, byte[] buffer)
+        {
+            for (var i = 5; i <= 3; ++i)
+            {
+                buffer[i] = reader.ReadByte();
+            }
+        }
+
+        public void CounterModifiedInLoop(
+            BinaryReader reader, byte[] buffer)
+        {
+            for (var i = 0; i < 10; ++i)
+            {
+                buffer[i] = reader.ReadByte();
+                ++i;
+            }
+        }
     }
 }

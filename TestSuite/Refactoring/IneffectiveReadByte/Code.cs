@@ -1,5 +1,8 @@
+#pragma warning disable CS8019
+
 namespace StyleChecker.Test.Refactoring.IneffectiveReadByte
 {
+    using System;
     using System.IO;
 
     public sealed class Code
@@ -68,6 +71,44 @@ namespace StyleChecker.Test.Refactoring.IneffectiveReadByte
                 {
                     buffer[i] = reader.ReadByte();
                 }
+            }
+        }
+
+        public void SystemInt32(BinaryReader reader, byte[] buffer)
+        {
+            for (System.Int32 i = 0; i < 10; ++i)
+//@         ^reader buffer
+            {
+                buffer[i] = reader.ReadByte();
+            }
+        }
+
+        public void Int32(BinaryReader reader, byte[] buffer)
+        {
+            for (Int32 i = 0; i < 10; ++i)
+//@         ^reader buffer
+            {
+                buffer[i] = reader.ReadByte();
+            }
+        }
+
+        public void LessThanWithOneIteration(
+            BinaryReader reader, byte[] buffer)
+        {
+            for (var i = 5; i < 6; ++i)
+//@         ^reader buffer
+            {
+                buffer[i] = reader.ReadByte();
+            }
+        }
+
+        public void LessThanOrEqualWithSameStartAndEnd(
+            BinaryReader reader, byte[] buffer)
+        {
+            for (var i = 5; i <= 5; i++)
+//@         ^reader buffer
+            {
+                buffer[i] = reader.ReadByte();
             }
         }
     }

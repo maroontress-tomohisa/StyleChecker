@@ -1,5 +1,8 @@
+#pragma warning disable CS8019
+
 namespace StyleChecker.Test.Refactoring.IneffectiveReadByte
 {
+    using System;
     using System.IO;
 
     public sealed class Code
@@ -138,6 +141,92 @@ namespace StyleChecker.Test.Refactoring.IneffectiveReadByte
                     }
                 };
                 _readFully(buffer, 0, 4);
+            }
+        }
+
+        public void SystemInt32(BinaryReader reader, byte[] buffer)
+        {
+            {
+                System.Action<byte[], int, int> _readFully = (_array, _offset, _length) =>
+                {
+                    var _reader = reader;
+                    while (_length > 0)
+                    {
+                        var _size = _reader.Read(_array, _offset, _length);
+                        if (_size is 0)
+                        {
+                            throw new System.IO.EndOfStreamException();
+                        }
+                        _offset += _size;
+                        _length -= _size;
+                    }
+                };
+                _readFully(buffer, 0, 10);
+            }
+        }
+
+        public void Int32(BinaryReader reader, byte[] buffer)
+        {
+            {
+                System.Action<byte[], int, int> _readFully = (_array, _offset, _length) =>
+                {
+                    var _reader = reader;
+                    while (_length > 0)
+                    {
+                        var _size = _reader.Read(_array, _offset, _length);
+                        if (_size is 0)
+                        {
+                            throw new System.IO.EndOfStreamException();
+                        }
+                        _offset += _size;
+                        _length -= _size;
+                    }
+                };
+                _readFully(buffer, 0, 10);
+            }
+        }
+
+        public void LessThanWithOneIteration(
+            BinaryReader reader, byte[] buffer)
+        {
+            {
+                System.Action<byte[], int, int> _readFully = (_array, _offset, _length) =>
+                {
+                    var _reader = reader;
+                    while (_length > 0)
+                    {
+                        var _size = _reader.Read(_array, _offset, _length);
+                        if (_size is 0)
+                        {
+                            throw new System.IO.EndOfStreamException();
+                        }
+                        _offset += _size;
+                        _length -= _size;
+                    }
+                };
+                _readFully(buffer, 5, 1);
+            }
+        }
+
+        public void LessThanOrEqualWithSameStartAndEnd(
+            BinaryReader reader, byte[] buffer)
+        {
+            {
+                System.Action<byte[], int, int> _readFully = (_array, _offset, _length) =>
+                {
+                    var _reader = reader;
+                    while (_length > 0)
+                    {
+                        var _size = _reader.Read(_array, _offset, _length);
+                        if (_size is 0)
+                        {
+                            throw new System.IO.EndOfStreamException();
+                        }
+                        _offset += _size;
+                        _length -= _size;
+                    }
+                };
+                _readFully(buffer, 5, 1);
             }
         }
     }
