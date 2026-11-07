@@ -42,4 +42,16 @@ namespace StyleChecker.Test.Refactoring.NotDesignedForExtension
             Console.WriteLine($"{nameof(ChildCode)}.{nameof(Method)}");
         }
     }
+
+    public abstract class AbstractBase
+    {
+        public abstract void Method();
+    }
+
+    public class DefaultBase : AbstractBase
+    {
+        public override void Method()
+        {
+        }
+    }
 }

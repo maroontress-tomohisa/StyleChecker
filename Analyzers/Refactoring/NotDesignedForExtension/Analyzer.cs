@@ -97,8 +97,8 @@ public sealed class Analyzer : AbstractAnalyzer
 
         var allMethods = allMembers.OfType<IMethodSymbol>()
             .Where(m => m.MethodKind == MethodKind.Ordinary
-                && ((m.IsVirtual && (!m.ReturnsVoid || !IsEmpty(m)))
-                    || (m.IsOverride && !m.IsSealed)))
+                && (m.IsVirtual || (m.IsOverride && !m.IsSealed))
+                && (!m.ReturnsVoid || !IsEmpty(m)))
             .Select(ToToken)
             .FilterNonNullValue()
             .Select(t => (t, R.Method));
