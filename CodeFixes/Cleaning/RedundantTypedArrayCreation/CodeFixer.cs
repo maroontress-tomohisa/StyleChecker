@@ -68,8 +68,11 @@ public sealed class CodeFixer : AbstractCodeFixProvider
         ArrayCreationExpressionSyntax node)
     {
         var solution = document.Project.Solution;
+        var arrayType = node.Type;
         var lastRankSpecifiers = node.Type.RankSpecifiers.Last();
-        var childTokens = lastRankSpecifiers.ChildTokens()
+        var trailingTrivia = lastRankSpecifiers.GetTrailingTrivia();
+        var outerRankSpecifier = arrayType.RankSpecifiers.First();
+        var childTokens = outerRankSpecifier.ChildTokens()
             .ToList();
         var tokenCount = childTokens.Count;
         if (tokenCount < 2
@@ -88,7 +91,7 @@ public sealed class CodeFixer : AbstractCodeFixProvider
             newKeyword,
             childTokens[0],
             commas,
-            childTokens[tokenCount - 1],
+            childTokens[tokenCount - 1].WithTrailingTrivia(trailingTrivia),
             initializer);
         if (root.ReplaceNode(node, newNode) is not {} newRoot)
         {

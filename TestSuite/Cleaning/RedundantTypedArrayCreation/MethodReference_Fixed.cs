@@ -43,6 +43,15 @@ public sealed class MethodReference
         };
     }
 
+    public void LambdaFromCSharp10()
+    {
+        var all = new[]
+        {
+            () => 1,
+            () => 2,
+        };
+    }
+
     private void One()
     {
     }

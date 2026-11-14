@@ -53,6 +53,36 @@ public sealed class Analyzer : AbstractAnalyzer
             helpLinkUri: HelpLink.ToUri(DiagnosticId));
     }
 
+    private static bool CanUseImplicitType(
+        ArrayCreationExpressionSyntax original,
+        SemanticModel model,
+        InitializerExpressionSyntax initializer)
+    {
+        var rank = original.Type.RankSpecifiers[0].Rank;
+        var commaToken = SyntaxFactory.Token(SyntaxKind.CommaToken);
+        var commas = SyntaxFactory.TokenList(
+            Enumerable.Repeat(commaToken, rank - 1));
+        var candidate = SyntaxFactory.ImplicitArrayCreationExpression(
+            commas, initializer);
+        var newTypeInfo = model.GetSpeculativeTypeInfo(
+            original.SpanStart,
+            candidate,
+            SpeculativeBindingOption.BindAsExpression);
+        var newType = newTypeInfo.Type;
+        var oldType = model.GetTypeInfo(original).Type;
+        return newType is IArrayTypeSymbol array
+            && array.ElementType is not IErrorTypeSymbol
+            && SymbolEqualityComparer.Default.Equals(oldType, newType);
+    }
+
+    private static bool CanUseImplicitType(IArrayCreationOperation o)
+    {
+        return o.Syntax is ArrayCreationExpressionSyntax original
+            && o.SemanticModel is {} model
+            && original.Initializer is {} initializer
+            && CanUseImplicitType(original, model, initializer);
+    }
+
     private static void AnalyzeModel(
         SemanticModelAnalysisContext context)
     {
@@ -176,10 +206,20 @@ public sealed class Analyzer : AbstractAnalyzer
                 : typeSet.FirstOrDefault(t => IsAncestorOfAll(t, typeSet));
         }
 
-        static bool WrapsMethodReference(IDelegateCreationOperation o)
+        static bool WrapsCallable(IDelegateCreationOperation o)
         {
+            /*
+                Callable operations mean method references and anonymous
+                functions (lambdas and anonymous methods).
+
+                - IMethodReferenceOperation
+                - IAnonymousFunctionOperation
+                  - Anounymous methods
+                  - Lambda functions
+            */
             var firstChild = o.ChildOperations.FirstOrDefault();
-            return firstChild is IMethodReferenceOperation;
+            return firstChild is IMethodReferenceOperation
+                || firstChild is IAnonymousFunctionOperation;
         }
 
         static bool ForReferenceType(IOperation o)
@@ -201,7 +241,9 @@ public sealed class Analyzer : AbstractAnalyzer
                 ? ForNullableValueType
                 : ForNonNullableValueType;
 
-        static bool ForMethodReference(IArrayInitializerOperation o)
+        static bool AreAllElements(
+            IArrayInitializerOperation o,
+            Func<IDelegateCreationOperation, bool> isValid)
         {
             return o.ElementValues
                 .Where(i => !IsNullLiteral(i)
@@ -210,7 +252,7 @@ public sealed class Analyzer : AbstractAnalyzer
                 /* Enumerable.Empty<T>().All(...) is always true */
                 .All(o => o is IDelegateCreationOperation c
                     && c.IsImplicit
-                    && WrapsMethodReference(c));
+                    && isValid(c));
         }
 
         static bool CheckTypeParameter(
@@ -246,8 +288,9 @@ public sealed class Analyzer : AbstractAnalyzer
                     _ => true,
                 };
             return result
-                || (langVersion < LanguageVersion.CSharp10
-                    && ForMethodReference(initializer));
+                || (langVersion < LanguageVersion.CSharp10)
+                    ? AreAllElements(initializer, WrapsCallable)
+                    : !CanUseImplicitType(newArray);
         }
 
         static bool CanBeImplicit(IArrayCreationOperation newArray)
@@ -291,7 +334,7 @@ public sealed class Analyzer : AbstractAnalyzer
                 Rule,
                 type.GetLocation(),
                 type,
-                type.RankSpecifiers.Last());
+                type.RankSpecifiers.First());
             context.ReportDiagnostic(diagnostic);
         }
     }

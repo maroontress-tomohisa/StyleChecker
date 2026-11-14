@@ -95,4 +95,22 @@ public sealed class Okay
             null,
         };
     }
+
+    public void AnonymousMethods()
+    {
+        var all = new Func<int>[]
+        {
+            delegate { return 1; },
+            delegate { return 2; },
+        };
+    }
+
+    public void LambdasWithImplicitParameterTypes()
+    {
+        var all = new Func<int, int>[]
+        {
+            x => x,
+            x => x + 1,
+        };
+    }
 }

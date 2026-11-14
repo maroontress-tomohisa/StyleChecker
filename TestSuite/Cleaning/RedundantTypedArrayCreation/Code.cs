@@ -2,6 +2,14 @@ namespace StyleChecker.Test.Cleaning.RedundantTypedArrayCreation;
 
 public sealed class Code
 {
+    public void MixedDimension()
+    {
+        var a = new int[][,] { new[,] { { 1 } } };
+        //@         ^int[][,]|[]
+        var b = new int[,][] { { new[] { 1 } } };
+        //@         ^int[,][]|[,]
+    }
+
     public void ArgumentSyntax()
     {
         int GetLength(string[] array)
@@ -64,6 +72,12 @@ public sealed class Code
     {
         var all = new string[,] { { "a", "b", }, { "c", "d", }, };
         //@           ^string[,]|[,]
+    }
+
+    public void ThreeDimension()
+    {
+        var all = new int[,,] { { { 1 }, { 2 } }, { { 3 }, { 4 } } };
+        //@           ^int[,,]|[,,]
     }
 
     public void NestedArray()
