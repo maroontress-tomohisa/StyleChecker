@@ -71,6 +71,32 @@ public sealed class Analyzer : AbstractAnalyzer
         }
     }
 
+    private static bool CanRename(ModelKit kit, SyntaxNode container)
+    {
+        return container switch
+        {
+            /*
+                We need to check TypeDeclarationSyntax first because
+                MemberDeclarationSyntax is an ancestor of
+                TypeDeclarationSyntax.
+
+                CSharpSyntaxNode
+                  ├─ MemberDeclarationSyntax
+                  │    └─ BaseTypeDeclarationSyntax
+                  │         └─ TypeDeclarationSyntax
+                  └─ StatementSyntax
+                       └─ LocalFunctionStatementSyntax
+            */
+            TypeDeclarationSyntax type
+                => CanTypeAcceptRenaming(kit, type),
+            MemberDeclarationSyntax member
+                => CanMemberAcceptRenaming(member),
+            LocalFunctionStatementSyntax function
+                => CanMemberAcceptRenaming(function),
+            _ => false,
+        };
+    }
+
     private static IEnumerable<TypeParameterSyntax> ToRenameableNodes(
         ModelKit kit, TypeParameterListSyntax typeParameterList)
     {
@@ -78,18 +104,9 @@ public sealed class Analyzer : AbstractAnalyzer
                 || parameters[0] is not { Identifier.Text: not "T" }
                 || typeParameterList.Parent is not {} container
                 || HasAncestorWithTypeParameterT(container)
+                || !CanRename(kit, container)
             ? []
-            : container switch
-            {
-                TypeDeclarationSyntax type
-                    => CanTypeAcceptRenaming(kit, type)
-                        ? parameters
-                        : [],
-                MemberDeclarationSyntax member
-                        when CanMemberAcceptRenaming(member)
-                    => parameters,
-                _ => [],
-            };
+            : parameters;
     }
 
     private static IEnumerable<SyntaxToken> DescendantIdentifierTokens(
@@ -97,8 +114,8 @@ public sealed class Analyzer : AbstractAnalyzer
         => node.DescendantTokens()
             .Where(t => t.IsKind(SyntaxKind.IdentifierToken));
 
-    private static bool CanMemberAcceptRenaming(MemberDeclarationSyntax member)
-        => DescendantIdentifierTokens(member)
+    private static bool CanMemberAcceptRenaming(SyntaxNode node)
+        => DescendantIdentifierTokens(node)
             .All(t => t.Text is not "T");
 
     private static IEnumerable<SyntaxToken> GetSelfAndMemberIdentifiers(
@@ -124,21 +141,31 @@ public sealed class Analyzer : AbstractAnalyzer
                 .All(t => t.Text is not "T");
     }
 
-    private static bool HasAncestorWithTypeParameterT(SyntaxNode origin)
+    private static bool ContainsTypeParameter(
+        TypeParameterListSyntax? maybeList)
     {
-        var maybeNode = origin.Parent;
-        while (maybeNode is {} node)
-        {
-            if (node is TypeDeclarationSyntax typeDeclaration
-                && typeDeclaration.TypeParameterList is {} list
-                && list.Parameters.Any(p => p.Identifier.Text is "T"))
-            {
-                return true;
-            }
-            maybeNode = node.Parent;
-        }
-        return false;
+        return maybeList is {} list
+            && list.Parameters.Any(p => p.Identifier.Text is "T");
     }
+
+    private static TypeParameterListSyntax? ToTypeParameters(SyntaxNode node)
+    {
+        return node switch
+        {
+            TypeDeclarationSyntax type
+                => type.TypeParameterList,
+            MethodDeclarationSyntax method
+                => method.TypeParameterList,
+            LocalFunctionStatementSyntax function
+                => function.TypeParameterList,
+            _ => null,
+        };
+    }
+
+    private static bool HasAncestorWithTypeParameterT(SyntaxNode origin)
+        => origin.Ancestors()
+            .Select(ToTypeParameters)
+            .Any(ContainsTypeParameter);
 
     private static IEnumerable<SyntaxToken> ToIdentifiers(
             MemberDeclarationSyntax m)

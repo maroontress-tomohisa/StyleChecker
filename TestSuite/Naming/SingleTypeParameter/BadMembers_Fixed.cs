@@ -9,4 +9,15 @@ public sealed class BadMembers
         {
         }
     }
+
+    public sealed class LocalFunctions
+    {
+        public static void M()
+        {
+            static void Local<T>()
+            {
+            }
+            Local<string>();
+        }
+    }
 }
