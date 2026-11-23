@@ -1,9 +1,9 @@
 namespace StyleChecker.Analyzers.Refactoring.StaticGenericClass;
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Threading;
 using Maroontress.Roastery;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -51,55 +51,188 @@ public sealed class Analyzer : AbstractAnalyzer
             helpLinkUri: HelpLink.ToUri(DiagnosticId));
     }
 
-    private static void AnalyzeModel(SemanticModelAnalysisContext context)
+    private static bool HasNoUnsafeMethod(
+            ClassDeclarationSyntax node,
+            Func<MethodDeclarationSyntax, bool> isMethodSafe)
     {
-        static bool IsClassTypeParameter(ISymbol s, ISymbol classSymbol)
-            => s.Kind is SymbolKind.TypeParameter
-                && Symbols.AreEqual(s.ContainingSymbol, classSymbol);
+        /*
+            If there are any methods whose parameters do not include all of
+            the class's type parameters, it is not safe to refactor the class.
+            For example:
 
-        static Func<ClassDeclarationSyntax, bool> NewIsTarget(
-            SemanticModel model, CancellationToken cancellationToken)
+                public static class C1<T>
+                    where T : class
+                {
+                    public static void M1()
+                    {
+                    }
+
+                    public static T? M2() => default;
+                }
+
+                public static class C2<T, U>
+                    where T : class
+                    where U : class
+                {
+                    public static void M3(T instance)
+                    {
+                    }
+                }
+
+            Also, if any method declares a type parameter with the same name
+            as one of the class's type parameters, it is not safe to refactor
+            the class. For example:
+
+                public static class C3<T>
+                    where T : class
+                {
+                    public static void M4<T>(T instance)
+                    {
+                    }
+                }
+
+            Also, if any method declares its own type parameter that is not
+            used in its parameter types, it is not safe to refactor the class.
+            For example:
+
+                public static class C4<T>
+                    where T : class
+                {
+                    public static U? M5<U>(T instance) => default;
+                }
+        */
+        var methods = node.Members
+            .OfType<MethodDeclarationSyntax>();
+        return methods.Any()
+            && methods.All(isMethodSafe);
+    }
+
+    private static bool AreMembersSafe(
+        ClassDeclarationSyntax node,
+        IEnumerable<TypeParameterSyntax> typeParameters,
+        ISymbol symbol,
+        ISymbolizer symbolizer)
+    {
+        var classTypeParameterSet = typeParameters.Select(symbolizer.ToSymbol)
+            .FilterNonNullReference()
+            .ToImmutableHashSet(SymbolEqualityComparer.Default);
+
+        bool IsClassTypeParameter(ISymbol s)
+            => Symbols.AreEqual(s.ContainingSymbol, symbol);
+
+        bool ContainsClassTypeParameter(IEnumerable<SyntaxNode> nodes)
+            => nodes.Where(n => n.IsKind(SyntaxKind.IdentifierName))
+                .Select(n => symbolizer.ToSymbolInfo(n).Symbol)
+                .FilterNonNullReference()
+                .Where(s => s.Kind is SymbolKind.TypeParameter)
+                .Any(IsClassTypeParameter);
+
+        bool HasUnsafeAttribute()
+            => ContainsClassTypeParameter(
+                node.AttributeLists
+                    .SelectMany(a => a.DescendantNodesAndSelf()));
+
+        bool HasNoUnsafeNonMethodMember()
         {
-            var toSymbol = (ClassDeclarationSyntax node)
-                => model.GetDeclaredSymbol(node, cancellationToken);
-            var toSymbolInfo = (SyntaxNode node)
-                => model.GetSymbolInfo(node, cancellationToken);
-            var toFirstMethod = (ClassDeclarationSyntax node, ISymbol symbol)
-                =>
-            {
-                var isTargetMethod = (MethodDeclarationSyntax m)
-                    => m.DescendantNodes()
-                        .Where(n => n.IsKind(SyntaxKind.IdentifierName))
-                        .Select(n => toSymbolInfo(n).Symbol)
-                        .FilterNonNullReference()
-                        .Any(s => IsClassTypeParameter(s, symbol));
-                return node.Members
-                    .OfType<MethodDeclarationSyntax>()
-                    .FirstOrDefault(isTargetMethod);
-            };
-            return node => toSymbol(node) is {} symbol
-                && symbol.IsStatic
-                && node.TypeParameterList is {} list
-                && list.Parameters.Any()
-                && toFirstMethod(node, symbol) is not null;
+            /*
+                If the class has any non-method member other than a constant
+                field of a value type or string that does not reference the
+                class's type parameters, it is not safe to refactor the class.
+                For example:
+
+                    public static class C<T> where T : class
+                    {
+                        public static T? Instance { get; } = default;
+                        public const string TypeName = nameof(T);
+
+                        public static void M(T instance) {}
+                    }
+            */
+            return node.Members
+                .Where(m => m is not MethodDeclarationSyntax)
+                .All(m => m is FieldDeclarationSyntax field
+                    && field.Modifiers.Any(SyntaxKind.ConstKeyword)
+                    && !ContainsClassTypeParameter(field.DescendantNodes()));
         }
 
-        var cancellationToken = context.CancellationToken;
-        var model = context.SemanticModel;
-        var isTarget = NewIsTarget(model, cancellationToken);
-        var root = model.SyntaxTree
-            .GetCompilationUnitRoot(context.CancellationToken);
+        ImmutableHashSet<ISymbol> NewParameterTypeSymbolSet(
+            SeparatedSyntaxList<ParameterSyntax> parameters)
+        {
+            return parameters.SelectMany(p => p.Type is {} parameterType
+                    ? parameterType.DescendantNodesAndSelf()
+                    : [])
+                .Where(n => n.IsKind(SyntaxKind.IdentifierName))
+                .Select(n => symbolizer.ToSymbolInfo(n).Symbol)
+                .FilterNonNullReference()
+                .Where(s => s.Kind is SymbolKind.TypeParameter)
+                .ToImmutableHashSet(SymbolEqualityComparer.Default);
+        }
+
+        bool IsMethodSafe(MethodDeclarationSyntax m)
+        {
+            /*
+                Return false if:
+
+                1. The method has no parameters.
+                2. The method has parameters, but their types contain no type
+                   parameters.
+                3. At least one type parameter of the CLASS is missing from
+                   the method's parameter types.
+                4. The METHOD has type parameters, and at least one of them is
+                   missing from the method's parameter types.
+
+                Note that the following code corresponds to 3:
+
+                    public static class C<T> where T : class
+                    {
+                        public static void M<T>(T instance) {}
+                    }
+            */
+            return
+                /* 1 */
+                m.ParameterList.Parameters is { Count: > 0 } methodParameters
+                /* 2 */
+                && NewParameterTypeSymbolSet(methodParameters)
+                    is { Count: > 0 } typeParametersInParameters
+                /* 3 */
+                && classTypeParameterSet.IsSubsetOf(typeParametersInParameters)
+                /* 4 */
+                && (m.TypeParameterList
+                        is not { Parameters: { Count: > 0 } typeParameters }
+                    || typeParameters.Select(symbolizer.ToSymbol)
+                        .FilterNonNullReference()
+                        .All(s => typeParametersInParameters.Contains(s)));
+        }
+
+        return !HasUnsafeAttribute()
+            && HasNoUnsafeNonMethodMember()
+            && HasNoUnsafeMethod(node, IsMethodSafe);
+    }
+
+    private static Func<ClassDeclarationSyntax, bool> NewIsTarget(
+        ISymbolizer symbolizer)
+    {
+        return node => symbolizer.ToSymbol(node) is {} symbol
+            && symbol.IsStatic
+            && !node.Modifiers.Any(SyntaxKind.PartialKeyword)
+            && node.TypeParameterList
+                is { Parameters: { Count: > 0 } parameters }
+            && node.Members.Count > 0
+            && AreMembersSafe(node, parameters, symbol, symbolizer);
+    }
+
+    private static void AnalyzeModel(SemanticModelAnalysisContext context)
+    {
+        var isTarget = NewIsTarget(context.GetSymbolizer());
+        var root = context.GetCompilationUnitRoot();
         var all = root.DescendantNodes()
             .OfType<ClassDeclarationSyntax>()
-            .Where(isTarget)
-            .ToList();
+            .Where(isTarget);
         foreach (var node in all)
         {
-            var location = node.ChildTokens()
-                .First(t => t.IsKind(SyntaxKind.IdentifierToken))
-                .GetLocation();
-            var diagnostic = Diagnostic.Create(
-                Rule, location, node.Identifier.Text);
+            var id = node.Identifier;
+            var location = id.GetLocation();
+            var diagnostic = Diagnostic.Create(Rule, location, id.Text);
             context.ReportDiagnostic(diagnostic);
         }
     }

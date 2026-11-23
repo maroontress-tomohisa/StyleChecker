@@ -2,6 +2,8 @@
 
 namespace StyleChecker.Test.Refactoring.StaticGenericClass;
 
+using System;
+
 public static class Code<T>
     //@             ^Code
     where T : class
@@ -87,4 +89,40 @@ public static class Reference
     {
         Code<string>.Method("hello");
     }
+}
+
+[AttributeUsage(
+    AttributeTargets.Class,
+    Inherited = false,
+    AllowMultiple = false)]
+public sealed class CustomAttribute(string name) : Attribute
+{
+    public string Name { get; } = name;
+}
+
+[CustomAttribute("T")]
+public static class WithSafeAttribute<T>
+//@                 ^WithSafeAttribute
+{
+    public static void Method(T x)
+    {
+    }
+}
+
+public static class ConstantAndMethods<T>
+//@                 ^ConstantAndMethods
+{
+    public const int Max = 10;
+    public const string Name = "ConstantAndMethods";
+    public const object Nothing = null;
+
+    public static void Method(T value)
+    {
+    }
+}
+
+public static class UserOfConstantAndMethods
+{
+    public const int Max = ConstantAndMethods<int>.Max;
+    public const string Name = ConstantAndMethods<string>.Name;
 }
