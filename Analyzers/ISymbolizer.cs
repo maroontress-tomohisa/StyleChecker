@@ -307,7 +307,7 @@ public interface ISymbolizer
     IOperation? GetOperation(SyntaxNode node);
 
     /// <summary>
-    /// Gets the type information to the specified syntax node.
+    /// Gets the type information corresponding to the specified syntax node.
     /// </summary>
     /// <param name="node">
     /// The syntax node.
@@ -316,6 +316,17 @@ public interface ISymbolizer
     /// The type information corresponding to the syntax node.
     /// </returns>
     TypeInfo ToTypeInfo(SyntaxNode node);
+
+    /// <summary>
+    /// Gets the symbol information corresponding to the specified syntax node.
+    /// </summary>
+    /// <param name="node">
+    /// The syntax node.
+    /// </param>
+    /// <returns>
+    /// The symbol information corresponding to the syntax node.
+    /// </returns>
+    SymbolInfo ToSymbolInfo(SyntaxNode node);
 
     /// <summary>
     /// Gets the data flow analysis corresponding to the specified syntax node

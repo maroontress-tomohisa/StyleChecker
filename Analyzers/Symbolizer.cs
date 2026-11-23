@@ -131,6 +131,10 @@ public sealed class Symbolizer(
         => Model.GetTypeInfo(node, CancellationToken);
 
     /// <inheritdoc/>
+    public SymbolInfo ToSymbolInfo(SyntaxNode node)
+        => Model.GetSymbolInfo(node, CancellationToken);
+
+    /// <inheritdoc/>
     public DataFlowAnalysis ToDataFlowAnalysis(SyntaxNode node)
         => Model.AnalyzeDataFlow(node);
 
